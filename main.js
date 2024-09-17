@@ -1,18 +1,23 @@
 (function () {
   const template = document.createElement('template');
   template.innerHTML = `
-    <style>
-    </style>
-    <div id="root" style="width: 100%; height: 100%;">
-      <p><a id="link_href" href="https://www.google.com/" target="_blank">Google</a></p>
-    </div>
-  `;
+        <style>
+        </style>
+        
+        <div id="root" style="width: 100%; height: 100%;">
+          <p><a id="link_href" href="https://www.google.com/" target="_blank">Google</a></p>
+          <button id="generateWordBtn">Generate Word Document</button>
+        </div>
+      `;
 
   class Main extends HTMLElement {
-    constructor () {
+    constructor() {
       super();
       this._shadowRoot = this.attachShadow({ mode: 'open' });
       this._shadowRoot.appendChild(template.content.cloneNode(true));
+
+      this.generateWordBtn = this._shadowRoot.getElementById('generateWordBtn');
+      this.generateWordBtn.addEventListener('click', () => this.generateWordDocument());
     }
 
     setLink(link) {
@@ -50,70 +55,106 @@
 
     onCustomWidgetDestroy() {}
 
+    // Modified render method to fetch data, log it, and generate a Word document
     async render() {
-      const url = `https://${this._ServerSAP}/${this._ODataService}`;
+      try {
+        console.log("Rendering started...");
+        
+        // Log postData for debugging purposes
+        if (!this._postData) {
+          console.error("No post data available!");
+          return;
+        }
+        
+        console.log("Post data:", this._postData);
 
-      // Fetch CSRF token first (GET request)
-      var xhrGet = new XMLHttpRequest();
-      xhrGet.open('GET', url, true);
-      xhrGet.setRequestHeader('X-CSRF-Token', 'Fetch');
-      xhrGet.setRequestHeader('Content-Type', 'application/json');
-      xhrGet.withCredentials = true;
-      xhrGet.send();
+        const url = `https://${this._ServerSAP}/${this._ODataService}`;
+        
+        // Step 1: Fetch CSRF token
+        const getRequest = new XMLHttpRequest();
+        getRequest.open('GET', url, true);
+        getRequest.setRequestHeader('X-CSRF-Token', 'Fetch');
+        getRequest.setRequestHeader('Access-Control-Allow-Methods', 'GET');
+        getRequest.setRequestHeader('Access-Control-Allow-Origin', 'https://itsvac-test.eu20.hcs.cloud.sap');
+        getRequest.setRequestHeader('Access-Control-Allow-Credentials', true);
+        getRequest.setRequestHeader('Access-Control-Expose-Headers', 'X-Csrf-Token,x-csrf-token');
+        getRequest.setRequestHeader('Content-Type', 'application/json');
+        getRequest.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        getRequest.withCredentials = true;
+        getRequest.send();
 
-      xhrGet.onreadystatechange = () => {
-        if (xhrGet.readyState === 4 && xhrGet.status === 200) {
-          const __XCsrfToken = xhrGet.getResponseHeader('x-csrf-token');
+        // Step 2: Once the CSRF token is fetched, process the POST request
+        getRequest.onreadystatechange = () => {
+          if (getRequest.readyState === 4) {
+            const csrfToken = getRequest.getResponseHeader('x-csrf-token');
+            console.log("CSRF token fetched:", csrfToken);
 
-          if (this._postData) {
+            // Proceed with POST request
             const data = this._postData; // Data to be posted
+            const postRequest = new XMLHttpRequest();
+            postRequest.open('POST', url, true);
+            postRequest.setRequestHeader('Content-type', 'application/json');
+            postRequest.setRequestHeader('Access-Control-Allow-Credentials', true);
+            postRequest.setRequestHeader('Cache-Control', 'no-cache');
+            postRequest.setRequestHeader("X-Referrer-Hash", window.location.hash);
+            postRequest.setRequestHeader('Access-Control-Allow-Origin', 'https://itsvac-test.eu20.hcs.cloud.sap');
+            postRequest.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            postRequest.setRequestHeader('X-CSRF-Token', csrfToken);
+            postRequest.withCredentials = true;
 
-            // Step 2. Send POST request with the retrieved CSRF token
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
-            xhr.setRequestHeader('Content-type', 'application/json');
-            xhr.setRequestHeader('X-CSRF-Token', __XCsrfToken);
-            xhr.withCredentials = true;
-            xhr.send(JSON.stringify(data));
+            postRequest.send(JSON.stringify(data));
 
-            xhr.onreadystatechange = () => {
-              if (xhr.readyState == 4 && xhr.status == 201) {
-                this.Response = JSON.parse(xhr.responseText);
-                // Logic to generate Word document using the response data
-                this.generateWordDoc(this.Response);
+            postRequest.onreadystatechange = () => {
+              if (postRequest.readyState === 4) {
+                if (postRequest.status === 201) {
+                  this.Response = JSON.parse(postRequest.responseText);
+                  console.log("Post request successful. Response:", this.Response);
+                }
               }
             };
           }
-        }
-      };
-    }
+        };
 
-    generateWordDoc(data) {
-      const docContent = `
-        Antrag Details:
-        Created by: ${data.CreatedBy}
-        Created on: ${data.CreatedOn}
-        Total Amount: ${data.TotalAmount}
-      `;
-
-      // Use a library like jsPDF, docx, or similar to generate the Word document
-      const doc = new docx.Document({
-        sections: [
-          {
+        // Step 3: After fetching the data, generate the Word document
+        const { CreatedBy, CreatedOn, TotalAmount } = this._postData;
+        
+        // Use docx library to create Word document
+        const doc = new docx.Document({
+          sections: [{
             properties: {},
             children: [
-              new docx.Paragraph(docContent)
-            ]
-          }
-        ]
-      });
+              new docx.Paragraph({
+                text: "Antrag Details",
+                heading: docx.HeadingLevel.HEADING_1,
+              }),
+              new docx.Paragraph(`Created by: ${CreatedBy}`),
+              new docx.Paragraph(`Created on: ${CreatedOn}`),
+              new docx.Paragraph(`Total Amount: ${TotalAmount}`),
+            ],
+          }],
+        });
 
-      docx.Packer.toBlob(doc).then((blob) => {
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "Antrag_Details.docx";
-        link.click();
-      });
+        // Export the document to a blob and trigger download
+        docx.Packer.toBlob(doc).then(blob => {
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "AntragDetails.docx";
+          link.click();
+        });
+
+      } catch (error) {
+        console.error("Error during render:", error);
+      }
+    }
+
+    // New method to generate Word document based on the data
+    async generateWordDocument() {
+      if (!this._postData) {
+        console.error("No post data available");
+        return;
+      }
+
+      this.render();
     }
   }
 
