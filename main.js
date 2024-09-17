@@ -1,118 +1,119 @@
 (function () {
   const template = document.createElement('template');
   template.innerHTML = `
-        <style>
-        </style>
-        
-        <div id="root" style="width: 100%; height: 100%;">
-          <button id="sendAntragDataBtn">Send Antrag Data</button>
-        </div>
-      `
+    <style>
+    </style>
+    <div id="root" style="width: 100%; height: 100%;">
+      <p><a id="link_href" href="https://www.google.com/" target="_blank">Google</a></p>
+    </div>
+  `;
 
   class Main extends HTMLElement {
     constructor () {
       super();
       this._shadowRoot = this.attachShadow({ mode: 'open' });
       this._shadowRoot.appendChild(template.content.cloneNode(true));
-
-      // Object to store the selected Antrag data
-      this.selectedAntrag = {
-        createdBy: "",
-        createdOn: "",
-        totalAmount: 0
-      };
-
-      // Variables to store link, Server SAP, and OData Service
-      this._link = "";
-      this._serverSAP = "";
-      this._ODataService = "";
-
-      // Add event listener for the button to send Antrag data
-      this._shadowRoot.getElementById('sendAntragDataBtn').addEventListener('click', () => {
-        this.fetchAntragData();  // Fetch selected Antrag data
-      });
     }
 
-    // Fetch selected Antrag data from the table
-    fetchAntragData() {
-      // Assuming 'Table_1' contains the Antrag data and the user has selected a row
-      var selectedData = Table_1.getSelections(); // Retrieve the selected Antrag from the table
-
-      if (selectedData.length > 0) {
-        var antragData = {
-          createdBy: selectedData[0].createdBy,  // Replace with actual field name for 'Created by'
-          createdOn: selectedData[0].createdOn,  // Replace with actual field name for 'Created on'
-          totalAmount: selectedData[0].totalAmount  // Replace with actual field name for 'Total Amount'
-        };
-
-        // Set the Antrag data in the widget
-        this.setAntragData(antragData);
-        this.sendPostData(antragData);  // Send the data
-      } else {
-        console.log("No Antrag selected");
-      }
-    }
-
-    // Set the Antrag data
-    setAntragData(antragData) {
-      this.selectedAntrag = antragData;
-      console.log("Antrag data set:", antragData);
-    }
-
-    // Set the Link value (from setLink in widget.json)
     setLink(link) {
       this._link = link;
-      console.log("Link set:", link);
     }
 
-    // Get the Link value (from getLink in widget.json)
+    setServerSAP(ServerSAP) {
+      this._ServerSAP = ServerSAP;
+    }
+
+    setODataServiceSAP(ODataService) {
+      this._ODataService = ODataService;
+    }
+
+    sendPostData(postData) {
+      this._postData = postData;
+      this.render();
+    }
+
+    sendGet() {
+      this.render();
+    }
+
+    getResponse() {
+      return this.Response;
+    }
+
     getLink() {
       return this._link;
     }
 
-    // Set the Server SAP value (from setServerSAP in widget.json)
-    setServerSAP(serverSAP) {
-      this._serverSAP = serverSAP;
-      console.log("Server SAP set:", serverSAP);
-    }
+    onCustomWidgetResize(width, height) {}
 
-    // Set the OData Service SAP value (from setODataServiceSAP in widget.json)
-    setODataServiceSAP(ODataService) {
-      this._ODataService = ODataService;
-      console.log("OData Service SAP set:", ODataService);
-    }
+    onCustomWidgetAfterUpdate(changedProps) {}
 
-    // Send post data
-    sendPostData(postData) {
-      this._postData = postData;  // Store the post data in the widget instance
-      console.log("Post Data to be sent:", postData);
+    onCustomWidgetDestroy() {}
 
-      this.render();  // Call render to simulate sending the data
-    }
-
-    // Render or perform the actual sending of data
     async render() {
-      console.log("Data to be posted:", this._postData);
+      const url = `https://${this._ServerSAP}/${this._ODataService}`;
 
-      // Here, you can add logic to send the data to an external service via HTTP
-      const request = new XMLHttpRequest();
-      const url = "https://your-api-endpoint.com";  // Replace with your real API endpoint
-      request.open("POST", url, true);
-      request.setRequestHeader("Content-Type", "application/json");
-      request.onreadystatechange = function () {
-        if (request.readyState === 4 && request.status === 200) {
-          console.log("Data posted successfully");
+      // Fetch CSRF token first (GET request)
+      var xhrGet = new XMLHttpRequest();
+      xhrGet.open('GET', url, true);
+      xhrGet.setRequestHeader('X-CSRF-Token', 'Fetch');
+      xhrGet.setRequestHeader('Content-Type', 'application/json');
+      xhrGet.withCredentials = true;
+      xhrGet.send();
+
+      xhrGet.onreadystatechange = () => {
+        if (xhrGet.readyState === 4 && xhrGet.status === 200) {
+          const __XCsrfToken = xhrGet.getResponseHeader('x-csrf-token');
+
+          if (this._postData) {
+            const data = this._postData; // Data to be posted
+
+            // Step 2. Send POST request with the retrieved CSRF token
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-type', 'application/json');
+            xhr.setRequestHeader('X-CSRF-Token', __XCsrfToken);
+            xhr.withCredentials = true;
+            xhr.send(JSON.stringify(data));
+
+            xhr.onreadystatechange = () => {
+              if (xhr.readyState == 4 && xhr.status == 201) {
+                this.Response = JSON.parse(xhr.responseText);
+                // Logic to generate Word document using the response data
+                this.generateWordDoc(this.Response);
+              }
+            };
+          }
         }
       };
-      request.send(JSON.stringify(this._postData));  // Send the Antrag data as JSON
     }
 
-    onCustomWidgetAfterUpdate(changedProps) {
-      // Handle updates to the custom widget
-    }
+    generateWordDoc(data) {
+      const docContent = `
+        Antrag Details:
+        Created by: ${data.CreatedBy}
+        Created on: ${data.CreatedOn}
+        Total Amount: ${data.TotalAmount}
+      `;
 
-    onCustomWidgetDestroy() {
-      // Clean up when the custom widget is destroyed
+      // Use a library like jsPDF, docx, or similar to generate the Word document
+      const doc = new docx.Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              new docx.Paragraph(docContent)
+            ]
+          }
+        ]
+      });
+
+      docx.Packer.toBlob(doc).then((blob) => {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "Antrag_Details.docx";
+        link.click();
+      });
     }
   }
 
