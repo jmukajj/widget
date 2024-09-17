@@ -1,8 +1,8 @@
 {
   "eula": "",
-  "vendor": "AA",
+  "vendor": "JM",
   "license": "",
-  "id": "com.sap.sac.aa",
+  "id": "com.sap.sac.jm",
   "version": "1.2.0",
   "name": "PostReq",
   "icon": "data:image/png;base64,...",
@@ -11,7 +11,7 @@
   "webcomponents": [
     {
       "kind": "main",
-      "tag": "com-sap-sac-aa",
+      "tag": "com-sap-sac-jm",
       "url": "https://github.com/jmukajj/widget/blob/main/main.js",
       "integrity": "",
       "ignoreIntegrity": true
