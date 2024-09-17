@@ -4,10 +4,10 @@
   "license": "",
   "id": "com.sap.sac.jm",
   "version": "1.2.0",
-  "name": "PostReq",
-  "icon": "data:image/png;base64,...",
-  "newInstancePrefix": "postRequest",
-  "description": "PostReq",
+  "name": "Custom_Widget",
+  "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAASCAYAAABSO15qAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAzklEQVQ4jWNgoBAwkqLYOLGjguH//1RGxv+7z8yvymBgYGBgIcm2//8lGRgZlP7/Z5CDiTGRYgA2QLEBOL2gFVrPxsXDYcfAwMDw7cuPQ9dWN/4iyQBebi75vwz/dkPZagwMDLexqaOeF4wT2jcyMjL4Mfz/33tmQVUJsQYgueA/K4RmZCXFBQMfjQNvADwWGBkZHv3/z3CPgZHxOQMDAwPjv9/fGJiZ7sLZDAwM/xkZnzP8/3+PkZHhEaUWwwGjSWL7f0oMYGFgYFCmxAAACtUz95booNoAAAAASUVORK5CYII=",
+  "newInstancePrefix": "Widget",
+  "description": "Widget",
   "webcomponents": [
     {
       "kind": "main",
@@ -27,12 +27,12 @@
       "default": 420
     }
   },
-  "methods": {
-    "getLink": {
+  "methods":{
+      "getLink": {
       "description": "Get Link",
       "returnType" : "string"
     },
-    "setLink": {
+      "setLink": {
       "description": "Set Link",
       "parameters": [
         {
@@ -42,22 +42,57 @@
         }
       ]
     },
-    "setAntragData": {
-      "description": "Set Antrag Data",
+     "setDimensionId": {
+      "description": "Set DimensionId",
       "parameters": [
         {
           "name": "value",
-          "type": "Object<string>",
-          "description": "Antrag Data"
+          "type": "string",
+          "description": "DimensionId"
         }
       ]
     },
-    "generateWordDocument": {
-      "description": "Generate Word Document",
+    "setServerSAP": {
+      "description": "Set Server SAP",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "description": "Server SAP"
+        }
+      ]
+    },
+    "setODataServiceSAP": {
+      "description": "Set OData Service SAP",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "description": "Server SAP"
+        }
+      ]
+    },
+    "sendPostData": {
+      "description": "Set Post Data",
+      "parameters": [
+        {
+          "name": "object",
+          "type": "Object<string>",
+          "description": "Post Data"
+        }
+      ]
+    },
+    "sendGet": {
+      "description": "GET request",
       "parameters": []
+    },
+      "getResponse": {
+      "description": "Get Response",
+      "returnType" : "Object<string>"
     }
+
   },
-  "events": {},
+  "events":{},
   "dataBindings": {
     "dataBinding": {
       "feeds": [
