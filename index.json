@@ -4,14 +4,14 @@
   "license": "",
   "id": "com.sap.sac.jm",
   "version": "1.2.0",
-  "name": "PostReq",
+  "name": "Widget",
   "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAASklEQVR42mJkIAEwCkZXRFNkbFiA5X9AsjbQhwEgbQQpZFY9qEBCuSgC6kFoFXBikIgSiFqEKotWgFwBiYJQOiCeKTBbGQwaE5AJFgChdQQrW14gzAUPAKJEZ8KuzgXAAAAAElFTkSuQmCC",
-  "newInstancePrefix": "postRequest",
-  "description": "PostReq",
+  "newInstancePrefix": "Widget",
+  "description": "Widget",
   "webcomponents": [
     {
       "kind": "main",
-      "tag": "com-sap-sac-aa",
+      "tag": "com-sap-sac-jm",
       "url": "postRequest/main.js",
       "integrity": "",
       "ignoreIntegrity": true
