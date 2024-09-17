@@ -1,18 +1,18 @@
 {
   "eula": "",
-  "vendor": "JM",
+  "vendor": "AA",
   "license": "",
   "id": "com.sap.sac.jm",
   "version": "1.2.0",
-  "name": "Custom_Widget",
+  "name": "PostReq",
   "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAASklEQVR42mJkIAEwCkZXRFNkbFiA5X9AsjbQhwEgbQQpZFY9qEBCuSgC6kFoFXBikIgSiFqEKotWgFwBiYJQOiCeKTBbGQwaE5AJFgChdQQrW14gzAUPAKJEZ8KuzgXAAAAAElFTkSuQmCC",
-  "newInstancePrefix": "Widget",
-  "description": "Widget",
+  "newInstancePrefix": "postRequest",
+  "description": "PostReq",
   "webcomponents": [
     {
       "kind": "main",
-      "tag": "com-sap-sac-jm",
-      "url": "https://raw.githubusercontent.com/jmukajj/widget/main/main.js",
+      "tag": "com-sap-sac-aa",
+      "url": "postRequest/main.js",
       "integrity": "",
       "ignoreIntegrity": true
     }
@@ -27,12 +27,12 @@
       "default": 420
     }
   },
-  "methods":{
-      "getLink": {
+  "methods": {
+    "getLink": {
       "description": "Get Link",
-      "returnType" : "string"
+      "returnType": "string"
     },
-      "setLink": {
+    "setLink": {
       "description": "Set Link",
       "parameters": [
         {
@@ -42,7 +42,7 @@
         }
       ]
     },
-     "setDimensionId": {
+    "setDimensionId": {
       "description": "Set DimensionId",
       "parameters": [
         {
@@ -68,12 +68,12 @@
         {
           "name": "value",
           "type": "string",
-          "description": "Server SAP"
+          "description": "OData Service"
         }
       ]
     },
     "sendPostData": {
-      "description": "Set Post Data",
+      "description": "Send POST Data",
       "parameters": [
         {
           "name": "object",
@@ -83,16 +83,15 @@
       ]
     },
     "sendGet": {
-      "description": "GET request",
+      "description": "GET Request",
       "parameters": []
     },
-      "getResponse": {
+    "getResponse": {
       "description": "Get Response",
-      "returnType" : "Object<string>"
+      "returnType": "Object<string>"
     }
-
   },
-  "events":{},
+  "events": {},
   "dataBindings": {
     "dataBinding": {
       "feeds": [
