@@ -1,0 +1,77 @@
+{
+  "eula": "",
+  "vendor": "AA",
+  "license": "",
+  "id": "com.sap.sac.aa",
+  "version": "1.2.0",
+  "name": "PostReq",
+  "icon": "data:image/png;base64,...",
+  "newInstancePrefix": "postRequest",
+  "description": "PostReq",
+  "webcomponents": [
+    {
+      "kind": "main",
+      "tag": "com-sap-sac-aa",
+      "url": "https://aarchadeloitte.github.io/postRequest/main.js",
+      "integrity": "",
+      "ignoreIntegrity": true
+    }
+  ],
+  "properties": {
+    "width": {
+      "type": "integer",
+      "default": 600
+    },
+    "height": {
+      "type": "integer",
+      "default": 420
+    }
+  },
+  "methods": {
+    "getLink": {
+      "description": "Get Link",
+      "returnType" : "string"
+    },
+    "setLink": {
+      "description": "Set Link",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "description": "Link"
+        }
+      ]
+    },
+    "setAntragData": {
+      "description": "Set Antrag Data",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "Object<string>",
+          "description": "Antrag Data"
+        }
+      ]
+    },
+    "generateWordDocument": {
+      "description": "Generate Word Document",
+      "parameters": []
+    }
+  },
+  "events": {},
+  "dataBindings": {
+    "dataBinding": {
+      "feeds": [
+        {
+          "id": "dimensions",
+          "description": "Dimensions",
+          "type": "dimension"
+        },
+        {
+          "id": "measures",
+          "description": "Measures",
+          "type": "mainStructureMember"
+        }
+      ]
+    }
+  }
+}
