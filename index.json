@@ -5,7 +5,7 @@
   "id": "com.sap.sac.jm",
   "version": "1.2.0",
   "name": "Custom_Widget",
-  "icon": ""icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAASklEQVR42mJkIAEwCkZXRFNkbFiA5X9AsjbQhwEgbQQpZFY9qEBCuSgC6kFoFXBikIgSiFqEKotWgFwBiYJQOiCeKTBbGQwaE5AJFgChdQQrW14gzAUPAKJEZ8KuzgXAAAAAElFTkSuQmCC",
+  "icon": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAASklEQVR42mJkIAEwCkZXRFNkbFiA5X9AsjbQhwEgbQQpZFY9qEBCuSgC6kFoFXBikIgSiFqEKotWgFwBiYJQOiCeKTBbGQwaE5AJFgChdQQrW14gzAUPAKJEZ8KuzgXAAAAAElFTkSuQmCC",
   "newInstancePrefix": "Widget",
   "description": "Widget",
   "webcomponents": [
