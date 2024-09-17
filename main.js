@@ -24,8 +24,28 @@
 
       // Adding event listener for the button to generate Word document
       this._shadowRoot.getElementById('generateWordBtn').addEventListener('click', () => {
-        this.generateWordDocument();
+        this.fetchAntragData();  // Fetch selected Antrag data
       });
+    }
+
+    // Method to fetch selected Antrag data from the SAC model
+    fetchAntragData() {
+      // Assuming 'Table_1' contains the Antrag data and the user has selected a row
+      var selectedData = Table_1.getSelections(); // Retrieve the selected Antrag from the table
+
+      if (selectedData.length > 0) {
+        var antragData = {
+          createdBy: selectedData[0].createdBy, // Replace with actual field name for 'Created by'
+          createdOn: selectedData[0].createdOn, // Replace with actual field name for 'Created on'
+          totalAmount: selectedData[0].totalAmount // Replace with actual field name for 'Total Amount'
+        };
+
+        // Set the Antrag data in the widget
+        this.setAntragData(antragData);
+        this.generateWordDocument();  // Call the document generation once data is set
+      } else {
+        console.log("No Antrag selected");
+      }
     }
 
     // Method to accept data (Antrag information) from the SAC model
