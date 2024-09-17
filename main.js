@@ -94,5 +94,5 @@
     }
   }
 
-  customElements.define('com-sap-sac-aa', Main);
+  customElements.define('com-sap-sac-jm', Main);
 })();
