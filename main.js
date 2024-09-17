@@ -5,7 +5,7 @@
         </style>
         
         <div id="root" style="width: 100%; height: 100%;">
-          <button id="generateWordBtn">Generate Word Document</button>
+          <button id="sendAntragDataBtn">Send Antrag Data</button>
         </div>
       `
 
@@ -22,97 +22,97 @@
         totalAmount: 0
       };
 
-      // Object to store the link and OData Service SAP
+      // Variables to store link, Server SAP, and OData Service
       this._link = "";
       this._serverSAP = "";
       this._ODataService = "";
 
-      // Adding event listener for the button to generate Word document
-      this._shadowRoot.getElementById('generateWordBtn').addEventListener('click', () => {
+      // Add event listener for the button to send Antrag data
+      this._shadowRoot.getElementById('sendAntragDataBtn').addEventListener('click', () => {
         this.fetchAntragData();  // Fetch selected Antrag data
       });
     }
 
-    // Method to set the link (from setLink in widget.json)
-    setLink(link) {
-      this._link = link;
-      console.log("Link set to:", link);
-    }
-
-    // Method to get the link (from getLink in widget.json)
-    getLink() {
-      return this._link;
-    }
-
-    // Method to set OData Service SAP (from setODataServiceSAP in widget.json)
-    setODataServiceSAP(ODataService) {
-      this._ODataService = ODataService;
-      console.log("OData Service SAP set to:", ODataService);
-    }
-
-    // Method to fetch selected Antrag data from the SAC model
+    // Fetch selected Antrag data from the table
     fetchAntragData() {
       // Assuming 'Table_1' contains the Antrag data and the user has selected a row
       var selectedData = Table_1.getSelections(); // Retrieve the selected Antrag from the table
 
       if (selectedData.length > 0) {
         var antragData = {
-          createdBy: selectedData[0].createdBy, // Replace with actual field name for 'Created by'
-          createdOn: selectedData[0].createdOn, // Replace with actual field name for 'Created on'
-          totalAmount: selectedData[0].totalAmount // Replace with actual field name for 'Total Amount'
+          createdBy: selectedData[0].createdBy,  // Replace with actual field name for 'Created by'
+          createdOn: selectedData[0].createdOn,  // Replace with actual field name for 'Created on'
+          totalAmount: selectedData[0].totalAmount  // Replace with actual field name for 'Total Amount'
         };
 
         // Set the Antrag data in the widget
         this.setAntragData(antragData);
-        this.generateWordDocument();  // Call the document generation once data is set
+        this.sendPostData(antragData);  // Send the data
       } else {
         console.log("No Antrag selected");
       }
     }
 
-    // Method to accept data (Antrag information) from the SAC model
+    // Set the Antrag data
     setAntragData(antragData) {
       this.selectedAntrag = antragData;
+      console.log("Antrag data set:", antragData);
     }
 
-    // Method to generate Word document using docxtemplater and JSZip
-    async generateWordDocument() {
-      const { createdBy, createdOn, totalAmount } = this.selectedAntrag;
+    // Set the Link value (from setLink in widget.json)
+    setLink(link) {
+      this._link = link;
+      console.log("Link set:", link);
+    }
 
-      // Load the JSZip and docxtemplater libraries dynamically
-      const JSZip = await import('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.2.2/jszip.min.js');
-      const Docxtemplater = await import('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.19.6/docxtemplater.min.js');
+    // Get the Link value (from getLink in widget.json)
+    getLink() {
+      return this._link;
+    }
 
-      // Base template for the Word document
-      const template = `
-        <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-          <w:body>
-            <w:p>
-              <w:r>
-                <w:t>Created by: ${createdBy}</w:t>
-              </w:r>
-            </w:p>
-            <w:p>
-              <w:r>
-                <w:t>Created on: ${createdOn}</w:t>
-              </w:r>
-            </w:p>
-            <w:p>
-              <w:r>
-                <w:t>Total Amount: ${totalAmount}</w:t>
-              </w:r>
-            </w:p>
-          </w:body>
-        </w:document>`;
+    // Set the Server SAP value (from setServerSAP in widget.json)
+    setServerSAP(serverSAP) {
+      this._serverSAP = serverSAP;
+      console.log("Server SAP set:", serverSAP);
+    }
 
-      // Use JSZip to generate a Word document
-      const zip = new JSZip();
-      zip.file("word/document.xml", template);
+    // Set the OData Service SAP value (from setODataServiceSAP in widget.json)
+    setODataServiceSAP(ODataService) {
+      this._ODataService = ODataService;
+      console.log("OData Service SAP set:", ODataService);
+    }
 
-      // Finalize the document and trigger download
-      zip.generateAsync({ type: "blob" }).then(function (blob) {
-        saveAs(blob, "Antrag_Document.docx");
-      });
+    // Send post data
+    sendPostData(postData) {
+      this._postData = postData;  // Store the post data in the widget instance
+      console.log("Post Data to be sent:", postData);
+
+      this.render();  // Call render to simulate sending the data
+    }
+
+    // Render or perform the actual sending of data
+    async render() {
+      console.log("Data to be posted:", this._postData);
+
+      // Here, you can add logic to send the data to an external service via HTTP
+      const request = new XMLHttpRequest();
+      const url = "https://your-api-endpoint.com";  // Replace with your real API endpoint
+      request.open("POST", url, true);
+      request.setRequestHeader("Content-Type", "application/json");
+      request.onreadystatechange = function () {
+        if (request.readyState === 4 && request.status === 200) {
+          console.log("Data posted successfully");
+        }
+      };
+      request.send(JSON.stringify(this._postData));  // Send the Antrag data as JSON
+    }
+
+    onCustomWidgetAfterUpdate(changedProps) {
+      // Handle updates to the custom widget
+    }
+
+    onCustomWidgetDestroy() {
+      // Clean up when the custom widget is destroyed
     }
   }
 
