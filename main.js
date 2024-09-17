@@ -22,10 +22,32 @@
         totalAmount: 0
       };
 
+      // Object to store the link and OData Service SAP
+      this._link = "";
+      this._serverSAP = "";
+      this._ODataService = "";
+
       // Adding event listener for the button to generate Word document
       this._shadowRoot.getElementById('generateWordBtn').addEventListener('click', () => {
         this.fetchAntragData();  // Fetch selected Antrag data
       });
+    }
+
+    // Method to set the link (from setLink in widget.json)
+    setLink(link) {
+      this._link = link;
+      console.log("Link set to:", link);
+    }
+
+    // Method to get the link (from getLink in widget.json)
+    getLink() {
+      return this._link;
+    }
+
+    // Method to set OData Service SAP (from setODataServiceSAP in widget.json)
+    setODataServiceSAP(ODataService) {
+      this._ODataService = ODataService;
+      console.log("OData Service SAP set to:", ODataService);
     }
 
     // Method to fetch selected Antrag data from the SAC model
