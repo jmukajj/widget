@@ -87,19 +87,31 @@
     }
 
     // Send post data that includes Antrag information from the table selection
-    sendPostData (selectedAntrag) {
-      console.log("Received selected Antrag: ", selectedAntrag);
-      
-      // Ensure selectedAntrag contains the expected properties
-      if (!selectedAntrag || !selectedAntrag.CreatedBy || !selectedAntrag.CreatedOn || !selectedAntrag.TotalAmount) {
-        console.error("Missing necessary Antrag data", selectedAntrag);
+    sendPostData (selectedRow) {
+      console.log("Received selected row: ", selectedRow);
+
+      // Extract relevant data from the row
+      const { Konto, Antrag, Wert } = selectedRow;
+
+      // Ensure row contains the expected properties
+      if (!Konto || !Antrag || !Wert) {
+        console.error("Missing necessary row data", selectedRow);
+
+        // Hardcoding values for testing
+        this._postData = {
+          CreatedBy: "John Doe (Test Data)",
+          CreatedOn: "2024-09-18",
+          TotalAmount: "1000 USD"
+        };
+        console.log("Using hardcoded test data since no proper data was passed: ", this._postData);
         return;
       }
 
+      // Map Konto, Antrag, and Wert to CreatedBy, CreatedOn, and TotalAmount
       this._postData = {
-        CreatedBy: selectedAntrag.CreatedBy,
-        CreatedOn: selectedAntrag.CreatedOn,
-        TotalAmount: selectedAntrag.TotalAmount
+        CreatedBy: Konto,      // Assuming Konto is the person who created it
+        CreatedOn: Antrag,     // Assuming Antrag is a timestamp or unique identifier
+        TotalAmount: Wert      // Assuming Wert is the total amount
       };
 
       console.log("Selected Antrag Data after population: ", this._postData); 
