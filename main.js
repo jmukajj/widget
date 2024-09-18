@@ -65,7 +65,7 @@
         } else {
           alert("No data selected from the table!");
         }
-      });
+      }.bind(this)); // Bind the context of "this" to ensure it's referring to the widget
 
       // Load external scripts in sequence
       this.loadScriptsInOrder([
