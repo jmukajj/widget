@@ -1,6 +1,6 @@
 (function () {
   const template = document.createElement('template');
-  template.innerHTML = 
+  template.innerHTML = `
        <style>
         #root {
             width: 300px;
@@ -46,7 +46,7 @@
             <p><a id="link_href" href="#" target="_blank">Download Word Document</a></p>
           </div>
        </div>
-  ;
+  `;
 
   class Main extends HTMLElement {
     constructor () {
@@ -81,7 +81,7 @@
         script.src = url;
         script.async = false;
         script.onload = () => resolve();
-        script.onerror = () => reject(Failed to load script: ${url});
+        script.onerror = () => reject(`Failed to load script: ${url}`);
         document.head.appendChild(script);
       });
     }
@@ -125,13 +125,13 @@
       const data = this._postData;
 
       // Create the content of the Word document
-      const content = 
-        Antrag Document
-        ------------------------------
-        Konto: ${data.Konto}
-        Antrag: ${data.Antrag}
-        Wert: ${data.Wert}
-      ;
+      const content = `
+      Antrag Document
+      ------------------------------
+      Konto: ${data.Konto}
+      Antrag: ${data.Antrag}
+      Wert: ${data.Wert}
+      `;
 
       console.log("Document content:", content);
 
