@@ -92,34 +92,28 @@
 
       // Ensure selectedAntrag contains the expected properties
       if (!selectedAntrag || !selectedAntrag.Konto || !selectedAntrag.Antrag || !selectedAntrag.Wert) {
-        console.log("Selected row data:", selectedAntrag); 
         console.error("Missing necessary Antrag data", selectedAntrag);
-
-        // Hardcoding values for testing
-        this._postData = {
-          Konto: "1234",
-          Antrag: "Antrag A",
-          Wert: "5000"
-        };
-        console.log("Using hardcoded test data since no proper data was passed: ", this._postData);
         return;
       }
 
+      // Assign the selected row data to the postData object
       this._postData = {
         Konto: selectedAntrag.Konto,
         Antrag: selectedAntrag.Antrag,
         Wert: selectedAntrag.Wert
       };
 
-      console.log("Selected Antrag Data after population: ", this._postData);
+      console.log("Post Data after selection: ", this._postData);
     }
 
     // Function to generate a Word document using Blob
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
+      // Check if the necessary data is available
       if (!this._postData || !this._postData.Konto || !this._postData.Antrag || !this._postData.Wert) {
         alert("No data or incomplete data to generate document");
+        console.error("No data or incomplete data:", this._postData);
         return;
       }
 
