@@ -86,7 +86,7 @@
       });
     }
 
-    // This function will be called by SAC when a row is selected in the SAC table
+    // This function will be called when the user selects a row in the SAC table
     sendPostData(selectedAntrag) {
       console.log("Received selected Antrag: ", selectedAntrag);
 
