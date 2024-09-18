@@ -12,6 +12,7 @@
   class Main extends HTMLElement {
     constructor () {
       super();
+      console.log('Widget initialized');
       this._shadowRoot = this.attachShadow({ mode: 'open' });
       this._shadowRoot.appendChild(template.content.cloneNode(true));
       this.Response = null;
