@@ -28,50 +28,6 @@
     }
   },
   "methods": {
-    "getLink": {
-      "description": "Get Link",
-      "returnType": "string"
-    },
-    "setLink": {
-      "description": "Set Link",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "string",
-          "description": "Link"
-        }
-      ]
-    },
-    "setDimensionId": {
-      "description": "Set DimensionId",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "string",
-          "description": "DimensionId"
-        }
-      ]
-    },
-    "setServerSAP": {
-      "description": "Set Server SAP",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "string",
-          "description": "Server SAP"
-        }
-      ]
-    },
-    "setODataServiceSAP": {
-      "description": "Set OData Service SAP",
-      "parameters": [
-        {
-          "name": "value",
-          "type": "string",
-          "description": "OData Service"
-        }
-      ]
-    },
     "sendPostData": {
       "description": "Send POST Data",
       "parameters": [
@@ -81,17 +37,8 @@
           "description": "Post Data"
         }
       ]
-    },
-    "sendGet": {
-      "description": "GET Request",
-      "parameters": []
-    },
-    "getResponse": {
-      "description": "Get Response",
-      "returnType": "Object<string>"
     }
   },
-  "events": {},
   "dataBindings": {
     "dataBinding": {
       "feeds": [
