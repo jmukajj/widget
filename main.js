@@ -59,13 +59,13 @@
 
       // Attach event listener for download link
       this._shadowRoot.getElementById('link_href').addEventListener('click', (event) => {
-        event.preventDefault(); // Prevent default behavior
+        event.preventDefault(); // Fix: event object is passed correctly
         if (this._postData) {
           this.generateWordDocument();
         } else {
           alert("No data selected from the table!");
         }
-      }.bind(this)); // Bind the context of "this" to ensure it's referring to the widget
+      });
 
       // Load external scripts in sequence
       this.loadScriptsInOrder([
