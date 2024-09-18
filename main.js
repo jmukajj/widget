@@ -6,7 +6,7 @@
             width: 300px;
             justify-content: flex-start;
             align-items: flex-start;
-            height: 100vh; /* Ensure the div takes the full height of the viewport */
+            height: 100vh;
         }
         .link-container {
             position: relative;
@@ -37,7 +37,7 @@
             color: #5E97C4;
             font-family: Arial, sans-serif;
             margin-bottom: 10px;
-            display: block; /* Ensures each link starts on a new line */
+            display: block;
         }
        </style>
 
@@ -56,18 +56,20 @@
       this._shadowRoot.appendChild(template.content.cloneNode(true));
       this.Response = null;
 
-      // Hardcoded random data for testing without specific fields
+      // Hardcoded random data for testing
       const randomData = {
         AntragID: "12345",  // Random Antrag ID
         Description: "Random Antrag Description",
         TotalAmount: "5000 USD" // Random amount
       };
 
-      // Automatically send hardcoded data as postData to simulate table selection
+      // Send hardcoded data as postData to simulate table selection
+      console.log("Setting random data:", randomData);  // Logging the data being set
       this.sendPostData(randomData);
 
       // Attach event listener for download link
       this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
+        console.log("Download link clicked");
         this.generateWordDocument();
       });
 
@@ -103,96 +105,10 @@
       }, Promise.resolve());
     }
 
-    // Setter for the link
-    setLink (link) {
-      this._link = link;
-    }
-
-    // Setter for the SAP Server
-    setServerSAP (ServerSAP) {
-      this._ServerSAP = ServerSAP;
-    }
-
-    // Setter for the OData service
-    setODataServiceSAP (ODataService) {
-      this._ODataService = ODataService;
-    }
-
     // Send post data that includes random Antrag information
     sendPostData (postData) {
-      this._postData = postData; // postData will now contain random Antrag info
-      this.render(); // Trigger the rendering of the widget
-    }
-
-    // Send GET request to fetch CSRF token and post request
-    sendGet () {
-      this.render();
-    }
-
-    // Get the response after the request
-    getResponse () {
-      return this.Response;
-    }
-
-    // Get the link
-    getLink () {
-      return this._link;
-    }
-
-    // Core rendering function handling both GET and POST requests
-    async render () {
-      const url = `https://${this._ServerSAP}/${this._ODataService}`;
-      
-      // GET request to fetch CSRF token
-      var xhrGet = new XMLHttpRequest();
-      xhrGet.open('GET', url, true);
-      xhrGet.setRequestHeader('X-CSRF-Token', 'Fetch');
-      xhrGet.setRequestHeader('Access-Control-Allow-Methods', 'GET');
-      xhrGet.setRequestHeader('Access-Control-Allow-Origin', 'https://itsvac-test.eu20.hcs.cloud.sap');
-      xhrGet.setRequestHeader('Access-Control-Allow-Credentials', true);
-      xhrGet.setRequestHeader('Access-Control-Expose-Headers','X-Csrf-Token,x-csrf-token');
-      xhrGet.setRequestHeader('Content-Type', 'application/json');
-      xhrGet.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-      xhrGet.withCredentials = true;
-      xhrGet.send();
-      
-      // Wait for the response
-      xhrGet.onreadystatechange = () => {
-        if (xhrGet.readyState === 4) {
-          
-          // Parse CSRF Token
-          this.Response = JSON.parse(xhrGet.responseText);
-          
-          if (this._postData) {
-            const data = this._postData; // Data containing random Antrag info
-            const __XCsrfToken = xhrGet.getResponseHeader('x-csrf-token');
-
-            // POST request with random Antrag data
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', url, true);
-            xhr.setRequestHeader('Content-type', 'application/json');
-            xhr.setRequestHeader('Access-Control-Allow-Credentials', true);
-            xhr.setRequestHeader('Cache-Control', 'no-cache');
-            xhr.setRequestHeader("X-Referrer-Hash", window.location.hash);
-            xhr.setRequestHeader('Access-Control-Allow-Origin', 'https://itsvac-test.eu20.hcs.cloud.sap');
-            xhr.setRequestHeader('Access-Control-Allow-Methods', 'POST');
-            xhr.setRequestHeader('X-CSRF-Token', __XCsrfToken);
-            xhr.withCredentials = true;
-
-            // Convert random Antrag data to JSON
-            xhr.send(JSON.stringify(data));
-
-            // Capture the response after posting
-            xhr.onreadystatechange = () => {
-              if (xhr.readyState == 4) {
-                if (xhr.status == 201) {
-                  this.Response = JSON.parse(xhr.responseText);
-                }
-              }
-            }
-          }
-        }
-      }
+      this._postData = postData;  // Store postData in the widget
+      console.log("Data has been set to _postData:", this._postData);  // Log the data
     }
 
     // Function to generate a Word document
@@ -217,14 +133,17 @@
       // Use JSZip to create a Word file
       const zip = new JSZip();
       const doc = new window.docxtemplater();
-      
+
       // Load the template and replace the content with the provided data
       zip.file("AntragDocument.txt", content);
-      
+
       // Generate the Word document as a blob
       zip.generateAsync({ type: "blob" })
         .then(function (blob) {
+          console.log("Word document generated, initiating download");
           saveAs(blob, "AntragDocument.docx"); // Download the generated document
+        }).catch((error) => {
+          console.error("Error generating the document:", error);
         });
     }
   }
