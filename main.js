@@ -20,6 +20,20 @@
       this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
         this.generateWordDocument();
       });
+
+      // Load external libraries
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js');
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.0/docxtemplater.js');
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js');
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js');
+    }
+
+    // Function to dynamically load external script
+    loadScript(url) {
+      const script = document.createElement('script');
+      script.src = url;
+      script.async = false;
+      document.head.appendChild(script);
     }
 
     // Setter for the link
