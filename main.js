@@ -58,6 +58,7 @@
 
       // Attach event listener for download link
       this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
+        event.preventDefault(); // Prevent the default action
         this.generateWordDocument();
       });
 
