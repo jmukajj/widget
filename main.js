@@ -74,7 +74,7 @@
 
       // Load the docx library dynamically from a reliable source
       this.loadScriptsInOrder([
-        'https://unpkg.com/docx@7.0.0-beta.4/build/index.js'
+        'https://cdn.jsdelivr.net/npm/docx@6.1.2/build/index.min.js'
       ]).then(() => {
         console.log("Docx library loaded successfully!");
       }).catch((error) => {
