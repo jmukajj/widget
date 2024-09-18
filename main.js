@@ -86,49 +86,38 @@
       });
     }
 
-    // Send post data that includes Antrag information from the table selection
-    sendPostData (selectedRow) {
-      console.log("Received selected row: ", selectedRow);
+    // This function will be called when the user selects a row in the SAC table
+    sendPostData(selectedAntrag) {
+      console.log("Received selected Antrag: ", selectedAntrag);
 
-      // Extract relevant data from the row
-      const { Konto, Antrag, Wert } = selectedRow;
-
-      // Ensure row contains the expected properties
-      if (!Konto || !Antrag || !Wert) {
-        console.error("Missing necessary row data", selectedRow);
+      // Ensure selectedAntrag contains the expected properties
+      if (!selectedAntrag || !selectedAntrag.Konto || !selectedAntrag.Antrag || !selectedAntrag.Wert) {
+        console.error("Missing necessary Antrag data", selectedAntrag);
 
         // Hardcoding values for testing
         this._postData = {
-          CreatedBy: "John Doe (Test Data)",
-          CreatedOn: "2024-09-18",
-          TotalAmount: "1000 USD"
+          Konto: "1234",
+          Antrag: "Antrag A",
+          Wert: "5000"
         };
         console.log("Using hardcoded test data since no proper data was passed: ", this._postData);
         return;
       }
 
-      // Map Konto, Antrag, and Wert to CreatedBy, CreatedOn, and TotalAmount
       this._postData = {
-        CreatedBy: Konto,      // Assuming Konto is the person who created it
-        CreatedOn: Antrag,     // Assuming Antrag is a timestamp or unique identifier
-        TotalAmount: Wert      // Assuming Wert is the total amount
+        Konto: selectedAntrag.Konto,
+        Antrag: selectedAntrag.Antrag,
+        Wert: selectedAntrag.Wert
       };
 
-      console.log("Selected Antrag Data after population: ", this._postData); 
-      this.render(); 
-    }
-
-    // Core rendering function handling both GET and POST requests
-    async render () {
-      // Here you would make your request to the server (if needed)
-      console.log("Rendering with postData: ", this._postData);
+      console.log("Selected Antrag Data after population: ", this._postData);
     }
 
     // Function to generate a Word document using Blob
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
-      if (!this._postData || !this._postData.CreatedBy || !this._postData.CreatedOn || !this._postData.TotalAmount) {
+      if (!this._postData || !this._postData.Konto || !this._postData.Antrag || !this._postData.Wert) {
         alert("No data or incomplete data to generate document");
         return;
       }
@@ -139,9 +128,9 @@
       const content = `
         Antrag Document
         ------------------------------
-        Created By: ${data.CreatedBy}
-        Created On: ${data.CreatedOn}
-        Total Amount: ${data.TotalAmount}
+        Konto: ${data.Konto}
+        Antrag: ${data.Antrag}
+        Wert: ${data.Wert}
       `;
 
       console.log("Document content:", content);
