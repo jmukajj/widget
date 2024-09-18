@@ -6,7 +6,7 @@
             width: 300px;
             justify-content: flex-start;
             align-items: flex-start;
-            height: 100vh;
+            height: 100vh; /* Ensure the div takes the full height of the viewport */
         }
         .link-container {
             position: relative;
@@ -37,7 +37,7 @@
             color: #5E97C4;
             font-family: Arial, sans-serif;
             margin-bottom: 10px;
-            display: block;
+            display: block; /* Ensures each link starts on a new line */
         }
        </style>
 
@@ -56,20 +56,19 @@
       this._shadowRoot.appendChild(template.content.cloneNode(true));
       this.Response = null;
 
-      // Hardcoded random data for testing
+      // Hardcoded random data for testing without specific fields
       const randomData = {
         AntragID: "12345",  // Random Antrag ID
         Description: "Random Antrag Description",
         TotalAmount: "5000 USD" // Random amount
       };
 
-      // Send hardcoded data as postData to simulate table selection
-      console.log("Setting random data:", randomData);  // Logging the data being set
+      // Automatically send hardcoded data as postData to simulate table selection
+      console.log("Sending Post Data: ", randomData); // Add log to verify postData
       this.sendPostData(randomData);
 
       // Attach event listener for download link
       this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
-        console.log("Download link clicked");
         this.generateWordDocument();
       });
 
@@ -105,15 +104,44 @@
       }, Promise.resolve());
     }
 
+    // Setter for the link
+    setLink (link) {
+      this._link = link;
+    }
+
+    // Setter for the SAP Server
+    setServerSAP (ServerSAP) {
+      this._ServerSAP = ServerSAP;
+    }
+
+    // Setter for the OData service
+    setODataServiceSAP (ODataService) {
+      this._ODataService = ODataService;
+    }
+
     // Send post data that includes random Antrag information
     sendPostData (postData) {
-      this._postData = postData;  // Store postData in the widget
-      console.log("Data has been set to _postData:", this._postData);  // Log the data
+      this._postData = postData; // postData will now contain random Antrag info
+      console.log("Post Data set: ", this._postData); // Add log to confirm postData
+      this.render(); // Trigger the rendering of the widget
+    }
+
+    // Core rendering function handling both GET and POST requests
+    async render () {
+      // Here you would make your request to the server (if needed)
+      console.log("Rendering with postData: ", this._postData);
     }
 
     // Function to generate a Word document
     generateWordDocument() {
-      console.log('Post Data:', this._postData);
+      console.log('Generating document with Post Data:', this._postData);
+
+      // Check if JSZip is available
+      if (typeof JSZip === 'undefined') {
+        alert('JSZip is not loaded. Please check if the library has loaded correctly.');
+        return;
+      }
+
       if (!this._postData) {
         alert("No data to generate document");
         return;
@@ -132,18 +160,18 @@
 
       // Use JSZip to create a Word file
       const zip = new JSZip();
-      const doc = new window.docxtemplater();
 
-      // Load the template and replace the content with the provided data
+      // Create text file inside the Word document
       zip.file("AntragDocument.txt", content);
 
       // Generate the Word document as a blob
       zip.generateAsync({ type: "blob" })
         .then(function (blob) {
-          console.log("Word document generated, initiating download");
+          console.log("Document generated successfully!");
           saveAs(blob, "AntragDocument.docx"); // Download the generated document
-        }).catch((error) => {
-          console.error("Error generating the document:", error);
+        })
+        .catch(function (error) {
+          console.error("Error generating document: ", error);
         });
     }
   }
