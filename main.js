@@ -21,19 +21,36 @@
         this.generateWordDocument();
       });
 
-      // Load external libraries
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js');
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.0/docxtemplater.js');
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js');
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js');
+      // Load the scripts in sequence
+      this.loadScriptsInOrder([
+        'https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.0/docxtemplater.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js'
+      ]).then(() => {
+        console.log("All libraries loaded successfully!");
+      }).catch((error) => {
+        console.error("Error loading scripts:", error);
+      });
     }
 
     // Function to dynamically load external script
     loadScript(url) {
-      const script = document.createElement('script');
-      script.src = url;
-      script.async = false;
-      document.head.appendChild(script);
+      return new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = url;
+        script.async = false;
+        script.onload = () => resolve();
+        script.onerror = () => reject(`Failed to load script: ${url}`);
+        document.head.appendChild(script);
+      });
+    }
+
+    // Function to load scripts in order
+    loadScriptsInOrder(scripts) {
+      return scripts.reduce((promise, script) => {
+        return promise.then(() => this.loadScript(script));
+      }, Promise.resolve());
     }
 
     // Setter for the link
