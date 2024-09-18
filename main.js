@@ -91,13 +91,14 @@
       console.log("Received selected Antrag: ", selectedAntrag);
 
       // Ensure selectedAntrag contains the expected properties
-      if (!selectedAntrag || !selectedAntrag.Konto || !selectedAntrag.Antrag || !selectedAntrag.Wert) {
+      if (!selectedAntrag || !selectedAntrag.Konto || !selectedAntrag.Antrag || !selectedAntrag.Version) || !selectedAntrag.Wert) {
         console.error("Missing necessary Antrag data", selectedAntrag);
 
         // Hardcoding values for testing
         this._postData = {
           Konto: "1234",
           Antrag: "Antrag A",
+          Version: "Version A",
           Wert: "5000"
         };
         console.log("Using hardcoded test data since no proper data was passed: ", this._postData);
@@ -107,6 +108,7 @@
       this._postData = {
         Konto: selectedAntrag.Konto,
         Antrag: selectedAntrag.Antrag,
+        Version: selectedAntrag.Version,
         Wert: selectedAntrag.Wert
       };
 
@@ -117,7 +119,7 @@
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
-      if (!this._postData || !this._postData.Konto || !this._postData.Antrag || !this._postData.Wert) {
+      if (!this._postData || !this._postData.Konto || !this._postData.Antrag || !this._postData.Version || !this._postData.Wert) {
         alert("No data or incomplete data to generate document");
         return;
       }
@@ -130,6 +132,7 @@
         ------------------------------
         Konto: ${data.Konto}
         Antrag: ${data.Antrag}
+        Antrag: ${data.Version}
         Wert: ${data.Wert}
       `;
 
