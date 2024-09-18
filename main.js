@@ -144,7 +144,22 @@
       // Use FileSaver.js to trigger download
       saveAs(blob, "AntragDocument.docx");
     }
+
+    connectedCallback() {
+        // Assign the link dynamically (commented earlier)
+        this._link_href = this._shadowRoot.getElementById('link_href');
+        // Here you would assign the actual URL link (if dynamic). Example:
+        // this._link_href.href = this._link;
+
+        // Check the data binding state
+        const dataBinding = this.dataBinding;
+        if (!dataBinding || dataBinding.state !== 'success') {
+            console.error("Data binding state is not 'success'");
+            return;
+        }
+        console.log("Data binding successful!");
+    }
   }
 
-  customElements.define('com-sap-sac-jm', Main);
+  customElements.define('com-sap-sac-exercise-aa30', Main);
 })();
