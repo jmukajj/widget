@@ -72,9 +72,9 @@
         this.generateWordDocument();
       });
 
-      // Load the docx library dynamically
+      // Load the docx library dynamically from a reliable source
       this.loadScriptsInOrder([
-        'https://cdnjs.cloudflare.com/ajax/libs/docx/7.0.0-beta.4/docx.min.js'
+        'https://unpkg.com/docx@7.0.0-beta.4/build/index.js'
       ]).then(() => {
         console.log("Docx library loaded successfully!");
       }).catch((error) => {
