@@ -105,7 +105,6 @@
         return;
       }
     }
-    console.log('Generating document with Post Data:', this._postData);
 
     // Function to generate a Word document using Blob
     generateWordDocument() {
