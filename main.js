@@ -56,16 +56,8 @@
       this._shadowRoot.appendChild(template.content.cloneNode(true));
       this.Response = null;
 
-      // Hardcoded random data for testing without specific fields
-      const randomData = {
-        AntragID: "12345",  // Random Antrag ID
-        Description: "Random Antrag Description",
-        TotalAmount: "5000 USD" // Random amount
-      };
-
-      // Automatically send hardcoded data as postData to simulate table selection
-      console.log("Sending Post Data: ", randomData); // Add log to verify postData
-      this.sendPostData(randomData);
+      // Initialize empty postData for selected Antrag
+      this._postData = {};
 
       // Attach event listener for download link
       this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
@@ -94,10 +86,16 @@
       });
     }
 
-    // Send post data that includes random Antrag information
-    sendPostData (postData) {
-      this._postData = postData; // postData will now contain random Antrag info
-      console.log("Post Data set: ", this._postData); // Add log to confirm postData
+    // Send post data that includes Antrag information from the table selection
+    sendPostData (selectedAntrag) {
+      // The selectedAntrag parameter will now contain the relevant information
+      this._postData = {
+        CreatedBy: selectedAntrag.CreatedBy,
+        CreatedOn: selectedAntrag.CreatedOn,
+        TotalAmount: selectedAntrag.TotalAmount
+      };
+
+      console.log("Selected Antrag Data: ", this._postData); // Add log to confirm postData
       this.render(); // Trigger the rendering of the widget
     }
 
@@ -107,7 +105,7 @@
       console.log("Rendering with postData: ", this._postData);
     }
 
-    // Function to generate a Word document using Blob (no external libraries)
+    // Function to generate a Word document using Blob
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
@@ -122,8 +120,8 @@
       const content = `
         Antrag Document
         ------------------------------
-        Antrag ID: ${data.AntragID}
-        Description: ${data.Description}
+        Created By: ${data.CreatedBy}
+        Created On: ${data.CreatedOn}
         Total Amount: ${data.TotalAmount}
       `;
 
