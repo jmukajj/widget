@@ -193,6 +193,7 @@
 
     // Function to generate a Word document
     generateWordDocument() {
+      console.log('Post Data:', this._postData);
       if (!this._postData) {
         alert("No data to generate document");
         return;
