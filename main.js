@@ -97,9 +97,18 @@
         return;
       }
 
-      this._postData = selectedRowData; // Store all selected data for the document generation
+      // Extract values instead of technical keys
+      const humanReadableData = {};
+      for (let key in selectedRowData) {
+        if (selectedRowData.hasOwnProperty(key)) {
+          // Assume there's a `value` property in the selectedRowData that contains the human-readable value
+          humanReadableData[key] = selectedRowData[key].value || selectedRowData[key]; // Fallback to key if value not present
+        }
+      }
 
-      console.log("Post Data after population: ", this._postData);
+      this._postData = humanReadableData; // Store the human-readable data for document generation
+
+      console.log("Post Data with human-readable values: ", this._postData);
     }
 
     // Function to generate a simple text document using Blob
