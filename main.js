@@ -64,17 +64,20 @@
         this.generateWordDocument();
       });
 
-      // Load FileSaver.js to save the blob (a small external script for downloads)
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js')
+      // Load external libraries to generate the .docx file
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.0.0/pizzip.min.js')
         .then(() => {
-          console.log("FileSaver.js loaded successfully!");
+          return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.22.2/docxtemplater.min.js');
+        })
+        .then(() => {
+          console.log("Libraries loaded successfully!");
         })
         .catch((error) => {
-          console.error("Error loading FileSaver.js:", error);
+          console.error("Error loading libraries:", error);
         });
     }
 
-    // Function to dynamically load external script
+    // Function to dynamically load external scripts
     loadScript(url) {
       return new Promise((resolve, reject) => {
         const script = document.createElement('script');
@@ -102,7 +105,7 @@
       console.log("Post Data after population: ", this._postData);
     }
 
-    // Function to generate a Word document using Blob
+    // Function to generate a real Word document using docxtemplater and PizZip
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
@@ -111,22 +114,53 @@
         return;
       }
 
-      let content = 'Antrag Document\n------------------------------\n';
+      // Create an empty Word document using PizZip
+      const zip = new PizZip();
+      const doc = new window.docxtemplater(zip);
 
-      // Dynamically append each field from _postData
-      for (let key in this._postData) {
-        if (this._postData.hasOwnProperty(key)) {
-            content += `${key}: ${this._postData[key]}\n`;
-        }
+      // Create the content for the Word document
+      const content = `
+        <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+          <w:body>
+            <w:p>
+              <w:r>
+                <w:t>Antrag Document</w:t>
+              </w:r>
+            </w:p>
+            <w:p>
+              <w:r>
+                <w:t>------------------------------</w:t>
+              </w:r>
+            </w:p>
+            ${Object.keys(this._postData).map(key => `
+              <w:p>
+                <w:r>
+                  <w:t>${key}: ${this._postData[key]}</w:t>
+                </w:r>
+              </w:p>
+            `).join('')}
+          </w:body>
+        </w:document>
+      `;
+
+      // Populate the document with the data
+      doc.loadZip(zip);
+      doc.setData(this._postData);
+
+      try {
+        doc.render(); // Render the document
+        const out = doc.getZip().generate({
+          type: "blob",
+          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        });
+
+        // Trigger the download using FileSaver.js
+        saveAs(out, "AntragDocument.docx");
+
+      } catch (error) {
+        console.error("Error rendering the document:", error);
+        alert("Failed to generate the document.");
       }
-
-      console.log("Document content:", content);
-
-      // Create a Blob from the content
-      const blob = new Blob([content], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-
-      // Use FileSaver.js to trigger download
-      saveAs(blob, "AntragDocument.docx");
     }
   }
 
