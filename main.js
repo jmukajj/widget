@@ -56,7 +56,7 @@
       this._shadowRoot.appendChild(template.content.cloneNode(true));
       this.Response = null;
 
-      // Initialize empty postData for selected Antrag
+      // Initialize empty postData for selected data
       this._postData = {};
 
       // Attach event listener for download link
@@ -87,46 +87,38 @@
     }
 
     // This function will be called when the user selects a row in the SAC table
-    sendPostData(selectedAntrag) {
-      console.log("Received selected Antrag: ", selectedAntrag);
+    sendPostData(selectedRowData) {
+      console.log("Received selected row data: ", selectedRowData);
 
-      // Ensure selectedAntrag contains the expected properties
-      if (!selectedAntrag || !selectedAntrag.Konto || !selectedAntrag.Antrag || !selectedAntrag.Wert) {
-        console.error("Missing necessary Antrag data", selectedAntrag);
+      // Ensure selectedRowData contains valid data
+      if (!selectedRowData || Object.keys(selectedRowData).length === 0) {
+        console.error("No data provided in selected row", selectedRowData);
+        alert("No data to generate document");
         return;
       }
 
-      // Assign the selected row data to the postData object
-      this._postData = {
-        Konto: selectedAntrag.Konto,
-        Antrag: selectedAntrag.Antrag,
-        Wert: selectedAntrag.Wert
-      };
+      this._postData = selectedRowData; // Store all selected data for the document generation
 
-      console.log("Post Data after selection: ", this._postData);
+      console.log("Post Data after population: ", this._postData);
     }
 
     // Function to generate a Word document using Blob
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
-      // Check if the necessary data is available
-      if (!this._postData || !this._postData.Konto || !this._postData.Antrag || !this._postData.Wert) {
-        alert("No data or incomplete data to generate document");
-        console.error("No data or incomplete data:", this._postData);
+      if (!this._postData || Object.keys(this._postData).length === 0) {
+        alert("No data to generate document");
         return;
       }
 
-      const data = this._postData;
+      let content = 'Antrag Document\n------------------------------\n';
 
-      // Create the content of the Word document
-      const content = `
-      Antrag Document
-      ------------------------------
-      Konto: ${data.Konto}
-      Antrag: ${data.Antrag}
-      Wert: ${data.Wert}
-      `;
+      // Dynamically append each field from _postData
+      for (let key in this._postData) {
+        if (this._postData.hasOwnProperty(key)) {
+            content += `${key}: ${this._postData[key]}\n`;
+        }
+      }
 
       console.log("Document content:", content);
 
