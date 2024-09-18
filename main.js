@@ -72,14 +72,14 @@
         this.generateWordDocument();
       });
 
-      // Load the docx library dynamically from a reliable source
-      this.loadScriptsInOrder([
-        'https://cdn.jsdelivr.net/npm/docx@7.0.0-beta.4/build/index.js'
-      ]).then(() => {
-        console.log("Docx library loaded successfully!");
-      }).catch((error) => {
-        console.error("Error loading scripts:", error);
-      });
+      // Load FileSaver.js to save the blob (a small external script for downloads)
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js')
+        .then(() => {
+          console.log("FileSaver.js loaded successfully!");
+        })
+        .catch((error) => {
+          console.error("Error loading FileSaver.js:", error);
+        });
     }
 
     // Function to dynamically load external script
@@ -92,13 +92,6 @@
         script.onerror = () => reject(`Failed to load script: ${url}`);
         document.head.appendChild(script);
       });
-    }
-
-    // Function to load scripts in order
-    loadScriptsInOrder(scripts) {
-      return scripts.reduce((promise, script) => {
-        return promise.then(() => this.loadScript(script));
-      }, Promise.resolve());
     }
 
     // Send post data that includes random Antrag information
@@ -114,7 +107,7 @@
       console.log("Rendering with postData: ", this._postData);
     }
 
-    // Function to generate a Word document using docx library
+    // Function to generate a Word document using Blob (no external libraries)
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
@@ -125,50 +118,20 @@
 
       const data = this._postData;
 
-      // Check if docx is available
-      if (typeof docx === 'undefined') {
-        alert('docx library is not loaded. Please check if the library has loaded correctly.');
-        return;
-      }
+      // Create the content of the Word document
+      const content = `
+        Antrag Document
+        ------------------------------
+        Antrag ID: ${data.AntragID}
+        Description: ${data.Description}
+        Total Amount: ${data.TotalAmount}
+      `;
 
-      // Create a new docx document
-      const { Document, Packer, Paragraph, TextRun } = docx;
+      // Create a Blob from the content
+      const blob = new Blob([content], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
 
-      const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun("Antrag Document"),
-                  new TextRun({
-                    text: "\n------------------------------",
-                    break: 1,
-                  }),
-                  new TextRun(`Antrag ID: ${data.AntragID}`),
-                  new TextRun({
-                    text: `\nDescription: ${data.Description}`,
-                    break: 1,
-                  }),
-                  new TextRun({
-                    text: `\nTotal Amount: ${data.TotalAmount}`,
-                    break: 1,
-                  }),
-                ],
-              }),
-            ],
-          },
-        ],
-      });
-
-      // Generate the document and trigger the download
-      Packer.toBlob(doc).then((blob) => {
-        console.log("Document generated successfully!");
-        saveAs(blob, "AntragDocument.docx"); // Download the generated document
-      }).catch((error) => {
-        console.error("Error generating document: ", error);
-      });
+      // Use FileSaver.js to trigger download
+      saveAs(blob, "AntragDocument.docx");
     }
   }
 
