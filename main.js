@@ -56,15 +56,15 @@
       this._shadowRoot.appendChild(template.content.cloneNode(true));
       this.Response = null;
 
-      // Hardcoded sample Antrag data for testing
-      const sampleAntragData = {
-        CreatedBy: "Random User",
-        CreatedOn: "2024-09-18",
-        TotalAmount: "1000 USD"
+      // Hardcoded random data for testing without specific fields
+      const randomData = {
+        AntragID: "12345",  // Random Antrag ID
+        Description: "Random Antrag Description",
+        TotalAmount: "5000 USD" // Random amount
       };
 
       // Automatically send hardcoded data as postData to simulate table selection
-      this.sendPostData(sampleAntragData);
+      this.sendPostData(randomData);
 
       // Attach event listener for download link
       this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
@@ -118,9 +118,9 @@
       this._ODataService = ODataService;
     }
 
-    // Send post data that includes selected Antrag information
+    // Send post data that includes random Antrag information
     sendPostData (postData) {
-      this._postData = postData; // postData will now contain "Antrag" info
+      this._postData = postData; // postData will now contain random Antrag info
       this.render(); // Trigger the rendering of the widget
     }
 
@@ -164,10 +164,10 @@
           this.Response = JSON.parse(xhrGet.responseText);
           
           if (this._postData) {
-            const data = this._postData; // Data containing Antrag info
+            const data = this._postData; // Data containing random Antrag info
             const __XCsrfToken = xhrGet.getResponseHeader('x-csrf-token');
 
-            // POST request with selected Antrag data
+            // POST request with random Antrag data
             var xhr = new XMLHttpRequest();
             xhr.open('POST', url, true);
             xhr.setRequestHeader('Content-type', 'application/json');
@@ -179,7 +179,7 @@
             xhr.setRequestHeader('X-CSRF-Token', __XCsrfToken);
             xhr.withCredentials = true;
 
-            // Convert Antrag data to JSON
+            // Convert random Antrag data to JSON
             xhr.send(JSON.stringify(data));
 
             // Capture the response after posting
@@ -192,12 +192,6 @@
             }
           }
         }
-      }
-      
-      // Data binding validation for SAC (if needed)
-      const dataBinding = this.dataBinding;
-      if (!dataBinding || dataBinding.state !== 'success') {
-        return;
       }
     }
 
@@ -215,8 +209,8 @@
       const content = `
         Antrag Document
         ------------------------------
-        Created by: ${data.CreatedBy}
-        Created on: ${data.CreatedOn}
+        Antrag ID: ${data.AntragID}
+        Description: ${data.Description}
         Total Amount: ${data.TotalAmount}
       `;
 
