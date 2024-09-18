@@ -1,4 +1,4 @@
-(function () { 
+(function () {
   const template = document.createElement('template');
   template.innerHTML = `
        <style>
@@ -55,6 +55,16 @@
       this._shadowRoot = this.attachShadow({ mode: 'open' });
       this._shadowRoot.appendChild(template.content.cloneNode(true));
       this.Response = null;
+
+      // Hardcoded sample Antrag data for testing
+      const sampleAntragData = {
+        CreatedBy: "Random User",
+        CreatedOn: "2024-09-18",
+        TotalAmount: "1000 USD"
+      };
+
+      // Automatically send hardcoded data as postData to simulate table selection
+      this.sendPostData(sampleAntragData);
 
       // Attach event listener for download link
       this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
