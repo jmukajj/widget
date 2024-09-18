@@ -5,156 +5,160 @@
         </style>
         
         <div id="root" style="width: 100%; height: 100%;">
-          <p><a id="link_href" href="https://www.google.com/" target="_blank">Google</a></p>
-          <button id="generateWordBtn">Generate Word Document</button>
+          <p><a id = "link_href" href="#" target="_blank" >Download Word Document</a></p>
         </div>
       `;
 
   class Main extends HTMLElement {
-    constructor() {
+    constructor () {
       super();
       this._shadowRoot = this.attachShadow({ mode: 'open' });
       this._shadowRoot.appendChild(template.content.cloneNode(true));
+      this.Response = null;
 
-      this.generateWordBtn = this._shadowRoot.getElementById('generateWordBtn');
-      this.generateWordBtn.addEventListener('click', () => this.generateWordDocument());
+      // Attach event listener for download link
+      this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
+        this.generateWordDocument();
+      });
     }
 
-    setLink(link) {
+    // Setter for the link
+    setLink (link) {
       this._link = link;
     }
 
-    setServerSAP(ServerSAP) {
+    // Setter for the SAP Server
+    setServerSAP (ServerSAP) {
       this._ServerSAP = ServerSAP;
     }
 
-    setODataServiceSAP(ODataService) {
+    // Setter for the OData service
+    setODataServiceSAP (ODataService) {
       this._ODataService = ODataService;
     }
 
-    sendPostData(postData) {
-      this._postData = postData;
+    // Send post data that includes selected Antrag information
+    sendPostData (postData) {
+      this._postData = postData; // postData will now contain "Antrag" info
+      this.render(); // Trigger the rendering of the widget
+    }
+
+    // Send GET request to fetch CSRF token and post request
+    sendGet () {
       this.render();
     }
 
-    sendGet() {
-      this.render();
-    }
-
-    getResponse() {
+    // Get the response after the request
+    getResponse () {
       return this.Response;
     }
 
-    getLink() {
+    // Get the link
+    getLink () {
       return this._link;
     }
 
-    onCustomWidgetResize(width, height) {}
+    // Widget resizing
+    onCustomWidgetResize (width, height) {}
 
-    onCustomWidgetAfterUpdate(changedProps) {}
+    // Widget update event
+    onCustomWidgetAfterUpdate (changedProps) {}
 
-    onCustomWidgetDestroy() {}
+    // Widget destroy event
+    onCustomWidgetDestroy () {}
 
-    // Modified render method to fetch data, log it, and generate a Word document
-    async render() {
-      try {
-        console.log("Rendering started...");
-        
-        // Log postData for debugging purposes
-        if (!this._postData) {
-          console.error("No post data available!");
-          return;
-        }
-        
-        console.log("Post data:", this._postData);
+    // Core rendering function handling both GET and POST requests
+    async render () {
+      const url = `https://${this._ServerSAP}/${this._ODataService}`;
+      
+      // GET request to fetch CSRF token
+      var xhrGet = new XMLHttpRequest();
+      xhrGet.open('GET', url, true);
+      xhrGet.setRequestHeader('X-CSRF-Token', 'Fetch');
+      xhrGet.setRequestHeader('Access-Control-Allow-Methods', 'GET');
+      xhrGet.setRequestHeader('Access-Control-Allow-Origin', 'https://itsvac-test.eu20.hcs.cloud.sap');
+      xhrGet.setRequestHeader('Access-Control-Allow-Credentials', true);
+      xhrGet.setRequestHeader('Access-Control-Expose-Headers','X-Csrf-Token,x-csrf-token');
+      xhrGet.setRequestHeader('Content-Type', 'application/json');
+      xhrGet.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      xhrGet.withCredentials = true;
+      xhrGet.send();
+      
+      // Wait for the response
+      xhrGet.onreadystatechange = () => {
+        if (xhrGet.readyState === 4) {
+          
+          // Parse CSRF Token
+          this.Response = JSON.parse(xhrGet.responseText);
+          
+          if (this._postData) {
+            const data = this._postData; // Data containing Antrag info
+            const __XCsrfToken = xhrGet.getResponseHeader('x-csrf-token');
 
-        const url = `https://${this._ServerSAP}/${this._ODataService}`;
-        
-        // Step 1: Fetch CSRF token
-        const getRequest = new XMLHttpRequest();
-        getRequest.open('GET', url, true);
-        getRequest.setRequestHeader('X-CSRF-Token', 'Fetch');
-        getRequest.setRequestHeader('Access-Control-Allow-Methods', 'GET');
-        getRequest.setRequestHeader('Access-Control-Allow-Origin', 'https://itsvac-test.eu20.hcs.cloud.sap');
-        getRequest.setRequestHeader('Access-Control-Allow-Credentials', true);
-        getRequest.setRequestHeader('Access-Control-Expose-Headers', 'X-Csrf-Token,x-csrf-token');
-        getRequest.setRequestHeader('Content-Type', 'application/json');
-        getRequest.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        getRequest.withCredentials = true;
-        getRequest.send();
+            // POST request with selected Antrag data
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-type', 'application/json');
+            xhr.setRequestHeader('Access-Control-Allow-Credentials', true);
+            xhr.setRequestHeader('Cache-Control', 'no-cache');
+            xhr.setRequestHeader("X-Referrer-Hash", window.location.hash);
+            xhr.setRequestHeader('Access-Control-Allow-Origin', 'https://itsvac-test.eu20.hcs.cloud.sap');
+            xhr.setRequestHeader('Access-Control-Allow-Methods', 'POST');
+            xhr.setRequestHeader('X-CSRF-Token', __XCsrfToken);
+            xhr.withCredentials = true;
 
-        // Step 2: Once the CSRF token is fetched, process the POST request
-        getRequest.onreadystatechange = () => {
-          if (getRequest.readyState === 4) {
-            const csrfToken = getRequest.getResponseHeader('x-csrf-token');
-            console.log("CSRF token fetched:", csrfToken);
+            // Convert Antrag data to JSON
+            xhr.send(JSON.stringify(data));
 
-            // Proceed with POST request
-            const data = this._postData; // Data to be posted
-            const postRequest = new XMLHttpRequest();
-            postRequest.open('POST', url, true);
-            postRequest.setRequestHeader('Content-type', 'application/json');
-            postRequest.setRequestHeader('Access-Control-Allow-Credentials', true);
-            postRequest.setRequestHeader('Cache-Control', 'no-cache');
-            postRequest.setRequestHeader("X-Referrer-Hash", window.location.hash);
-            postRequest.setRequestHeader('Access-Control-Allow-Origin', 'https://itsvac-test.eu20.hcs.cloud.sap');
-            postRequest.setRequestHeader('Access-Control-Allow-Methods', 'POST');
-            postRequest.setRequestHeader('X-CSRF-Token', csrfToken);
-            postRequest.withCredentials = true;
-
-            postRequest.send(JSON.stringify(data));
-
-            postRequest.onreadystatechange = () => {
-              if (postRequest.readyState === 4) {
-                if (postRequest.status === 201) {
-                  this.Response = JSON.parse(postRequest.responseText);
-                  console.log("Post request successful. Response:", this.Response);
+            // Capture the response after posting
+            xhr.onreadystatechange = () => {
+              if (xhr.readyState == 4) {
+                if (xhr.status == 201) {
+                  this.Response = JSON.parse(xhr.responseText);
                 }
               }
-            };
+            }
           }
-        };
-
-        // Step 3: After fetching the data, generate the Word document
-        const { CreatedBy, CreatedOn, TotalAmount } = this._postData;
-        
-        // Use docx library to create Word document
-        const doc = new docx.Document({
-          sections: [{
-            properties: {},
-            children: [
-              new docx.Paragraph({
-                text: "Antrag Details",
-                heading: docx.HeadingLevel.HEADING_1,
-              }),
-              new docx.Paragraph(`Created by: ${CreatedBy}`),
-              new docx.Paragraph(`Created on: ${CreatedOn}`),
-              new docx.Paragraph(`Total Amount: ${TotalAmount}`),
-            ],
-          }],
-        });
-
-        // Export the document to a blob and trigger download
-        docx.Packer.toBlob(doc).then(blob => {
-          const link = document.createElement("a");
-          link.href = URL.createObjectURL(blob);
-          link.download = "AntragDetails.docx";
-          link.click();
-        });
-
-      } catch (error) {
-        console.error("Error during render:", error);
+        }
+      }
+      
+      // Data binding validation for SAC (if needed)
+      const dataBinding = this.dataBinding;
+      if (!dataBinding || dataBinding.state !== 'success') {
+        return;
       }
     }
 
-    // New method to generate Word document based on the data
-    async generateWordDocument() {
+    // Function to generate a Word document
+    generateWordDocument() {
       if (!this._postData) {
-        console.error("No post data available");
+        alert("No data to generate document");
         return;
       }
 
-      this.render();
+      const data = this._postData;
+
+      // Template for the Word document
+      const content = `
+        Antrag Document
+        ------------------------------
+        Created by: ${data.CreatedBy}
+        Created on: ${data.CreatedOn}
+        Total Amount: ${data.TotalAmount}
+      `;
+
+      // Use JSZip to create a Word file
+      const zip = new JSZip();
+      const doc = new window.docxtemplater();
+      
+      // Load the template and replace the content with the provided data
+      zip.file("AntragDocument.txt", content);
+      
+      // Generate the Word document as a blob
+      zip.generateAsync({ type: "blob" })
+        .then(function (blob) {
+          saveAs(blob, "AntragDocument.docx"); // Download the generated document
+        });
     }
   }
 
