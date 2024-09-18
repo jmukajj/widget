@@ -72,14 +72,11 @@
         this.generateWordDocument();
       });
 
-      // Load external scripts in sequence
+      // Load the docx library dynamically
       this.loadScriptsInOrder([
-        'https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.0/docxtemplater.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js'
+        'https://cdnjs.cloudflare.com/ajax/libs/docx/7.0.0-beta.4/docx.min.js'
       ]).then(() => {
-        console.log("All libraries loaded successfully!");
+        console.log("Docx library loaded successfully!");
       }).catch((error) => {
         console.error("Error loading scripts:", error);
       });
@@ -132,15 +129,9 @@
       console.log("Rendering with postData: ", this._postData);
     }
 
-    // Function to generate a Word document
+    // Function to generate a Word document using docx library
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
-
-      // Check if JSZip is available
-      if (typeof JSZip === 'undefined') {
-        alert('JSZip is not loaded. Please check if the library has loaded correctly.');
-        return;
-      }
 
       if (!this._postData) {
         alert("No data to generate document");
@@ -149,30 +140,50 @@
 
       const data = this._postData;
 
-      // Template for the Word document
-      const content = `
-        Antrag Document
-        ------------------------------
-        Antrag ID: ${data.AntragID}
-        Description: ${data.Description}
-        Total Amount: ${data.TotalAmount}
-      `;
+      // Check if docx is available
+      if (typeof docx === 'undefined') {
+        alert('docx library is not loaded. Please check if the library has loaded correctly.');
+        return;
+      }
 
-      // Use JSZip to create a Word file
-      const zip = new JSZip();
+      // Create a new docx document
+      const { Document, Packer, Paragraph, TextRun } = docx;
 
-      // Create text file inside the Word document
-      zip.file("AntragDocument.txt", content);
+      const doc = new Document({
+        sections: [
+          {
+            properties: {},
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun("Antrag Document"),
+                  new TextRun({
+                    text: "\n------------------------------",
+                    break: 1,
+                  }),
+                  new TextRun(`Antrag ID: ${data.AntragID}`),
+                  new TextRun({
+                    text: `\nDescription: ${data.Description}`,
+                    break: 1,
+                  }),
+                  new TextRun({
+                    text: `\nTotal Amount: ${data.TotalAmount}`,
+                    break: 1,
+                  }),
+                ],
+              }),
+            ],
+          },
+        ],
+      });
 
-      // Generate the Word document as a blob
-      zip.generateAsync({ type: "blob" })
-        .then(function (blob) {
-          console.log("Document generated successfully!");
-          saveAs(blob, "AntragDocument.docx"); // Download the generated document
-        })
-        .catch(function (error) {
-          console.error("Error generating document: ", error);
-        });
+      // Generate the document and trigger the download
+      Packer.toBlob(doc).then((blob) => {
+        console.log("Document generated successfully!");
+        saveAs(blob, "AntragDocument.docx"); // Download the generated document
+      }).catch((error) => {
+        console.error("Error generating document: ", error);
+      });
     }
   }
 
