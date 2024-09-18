@@ -90,25 +90,30 @@
     sendPostData(selectedRowData) {
       console.log("Received selected row data: ", selectedRowData);
 
-      // Ensure selectedRowData contains valid data
+      // Check if there is valid data in selectedRowData
       if (!selectedRowData || Object.keys(selectedRowData).length === 0) {
         console.error("No data provided in selected row", selectedRowData);
         alert("No data to generate document");
         return;
       }
 
-      // Extract values instead of technical keys
-      const humanReadableData = {};
+      // Create an object to store the column names and their values
+      const rowDataWithValues = {};
       for (let key in selectedRowData) {
         if (selectedRowData.hasOwnProperty(key)) {
-          // Assume there's a `value` property in the selectedRowData that contains the human-readable value
-          humanReadableData[key] = selectedRowData[key].value || selectedRowData[key]; // Fallback to key if value not present
+          // If the key holds an object with a `value` property, use the `value`
+          if (selectedRowData[key].value) {
+            rowDataWithValues[key] = selectedRowData[key].value;
+          } else {
+            // Otherwise, assume the raw value is needed
+            rowDataWithValues[key] = selectedRowData[key];
+          }
         }
       }
 
-      this._postData = humanReadableData; // Store the human-readable data for document generation
+      this._postData = rowDataWithValues; // Store the human-readable data for document generation
 
-      console.log("Post Data with human-readable values: ", this._postData);
+      console.log("Post Data with column names and values: ", this._postData);
     }
 
     // Function to generate a simple text document using Blob
@@ -122,7 +127,7 @@
 
       let content = 'Selected Row Data\n------------------------------\n';
 
-      // Dynamically append each field from _postData
+      // Dynamically append each field (column name) and its corresponding value
       for (let key in this._postData) {
         if (this._postData.hasOwnProperty(key)) {
             content += `${key}: ${this._postData[key]}\n`;
