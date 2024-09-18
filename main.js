@@ -55,11 +55,16 @@
       this._shadowRoot = this.attachShadow({ mode: 'open' });
       this._shadowRoot.appendChild(template.content.cloneNode(true));
       this.Response = null;
+      this._postData = null; // Initialize as null
 
       // Attach event listener for download link
-      this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
-        event.preventDefault(); // Prevent the default action
-        this.generateWordDocument();
+      this._shadowRoot.getElementById('link_href').addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent default behavior
+        if (this._postData) {
+          this.generateWordDocument();
+        } else {
+          alert("No data selected from the table!");
+        }
       });
 
       // Load external scripts in sequence
@@ -73,25 +78,46 @@
       }).catch((error) => {
         console.error("Error loading scripts:", error);
       });
+
+      // Listen for table row selection
+      this.setupTableInteraction();
     }
 
-    // Function to dynamically load external script
-    loadScript(url) {
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = url;
-        script.async = false;
-        script.onload = () => resolve();
-        script.onerror = () => reject(`Failed to load script: ${url}`);
-        document.head.appendChild(script);
-      });
+    // Function to set up interaction with the table
+    setupTableInteraction() {
+      // Assuming the table has the ID 'your-table-element', change this to match your actual table ID
+      const table = document.querySelector('#your-table-element');
+      
+      if (table) {
+        table.addEventListener('click', (event) => {
+          const selectedData = this.getSelectedTableRowData(event);
+          if (selectedData) {
+            this.sendPostData(selectedData); // Pass data to sendPostData
+          }
+        });
+      } else {
+        console.error('Table not found! Ensure you are using the correct table ID.');
+      }
     }
 
-    // Function to load scripts in order
-    loadScriptsInOrder(scripts) {
-      return scripts.reduce((promise, script) => {
-        return promise.then(() => this.loadScript(script));
-      }, Promise.resolve());
+    // Function to extract data from the selected row
+    getSelectedTableRowData(event) {
+      // Implement this function to get the data from the selected row
+      // Assuming each row has data attributes or cells with relevant info
+      const row = event.target.closest('tr'); // Get the row that was clicked
+
+      if (row) {
+        const data = {
+          CreatedBy: row.dataset.createdBy || 'DefaultUser',
+          CreatedOn: row.dataset.createdOn || '2024-09-18',
+          TotalAmount: row.dataset.totalAmount || '1000'
+        };
+        console.log('Selected row data:', data);
+        return data;
+      }
+
+      console.error('No row data found!');
+      return null;
     }
 
     // Setter for the link
@@ -111,7 +137,8 @@
 
     // Send post data that includes selected Antrag information
     sendPostData (postData) {
-      this._postData = postData; // postData will now contain "Antrag" info
+      this._postData = postData; // Save the post data for later use
+      console.log('Post Data set:', postData);
       this.render(); // Trigger the rendering of the widget
     }
 
@@ -150,7 +177,6 @@
       // Wait for the response
       xhrGet.onreadystatechange = () => {
         if (xhrGet.readyState === 4) {
-          
           // Parse CSRF Token
           this.Response = JSON.parse(xhrGet.responseText);
           
