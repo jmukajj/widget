@@ -1,6 +1,6 @@
 (function () {
   const template = document.createElement('template');
-  template.innerHTML = `
+  template.innerHTML = 
        <style>
         #root {
             width: 300px;
@@ -46,7 +46,7 @@
             <p><a id="link_href" href="#" target="_blank">Download Word Document</a></p>
           </div>
        </div>
-  `;
+  ;
 
   class Main extends HTMLElement {
     constructor () {
@@ -81,7 +81,7 @@
         script.src = url;
         script.async = false;
         script.onload = () => resolve();
-        script.onerror = () => reject(`Failed to load script: ${url}`);
+        script.onerror = () => reject(Failed to load script: ${url});
         document.head.appendChild(script);
       });
     }
@@ -91,15 +91,14 @@
       console.log("Received selected Antrag: ", selectedAntrag);
 
       // Ensure selectedAntrag contains the expected properties
-      if (!selectedAntrag || !selectedAntrag.Konto || !selectedAntrag.Antrag || !selectedAntrag.Wert || !selectedAntrag.Version) {
+      if (!selectedAntrag || !selectedAntrag.Konto || !selectedAntrag.Antrag || !selectedAntrag.Wert) {
         console.error("Missing necessary Antrag data", selectedAntrag);
 
         // Hardcoding values for testing
         this._postData = {
           Konto: "1234",
           Antrag: "Antrag A",
-          Wert: "5000",
-          Version: "1.0"
+          Wert: "5000"
         };
         console.log("Using hardcoded test data since no proper data was passed: ", this._postData);
         return;
@@ -108,8 +107,7 @@
       this._postData = {
         Konto: selectedAntrag.Konto,
         Antrag: selectedAntrag.Antrag,
-        Wert: selectedAntrag.Wert,
-        Version: selectedAntrag.Version
+        Wert: selectedAntrag.Wert
       };
 
       console.log("Selected Antrag Data after population: ", this._postData);
@@ -119,7 +117,7 @@
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
-      if (!this._postData || !this._postData.Konto || !this._postData.Antrag || !this._postData.Wert || !this._postData.Version) {
+      if (!this._postData || !this._postData.Konto || !this._postData.Antrag || !this._postData.Wert) {
         alert("No data or incomplete data to generate document");
         return;
       }
@@ -127,14 +125,13 @@
       const data = this._postData;
 
       // Create the content of the Word document
-      const content = `
+      const content = 
         Antrag Document
         ------------------------------
         Konto: ${data.Konto}
         Antrag: ${data.Antrag}
         Wert: ${data.Wert}
-        Version: ${data.Version}
-      `;
+      ;
 
       console.log("Document content:", content);
 
@@ -144,22 +141,9 @@
       // Use FileSaver.js to trigger download
       saveAs(blob, "AntragDocument.docx");
     }
-
-    connectedCallback() {
-        // Assign the link dynamically (commented earlier)
-        this._link_href = this._shadowRoot.getElementById('link_href');
-        // Here you would assign the actual URL link (if dynamic). Example:
-        // this._link_href.href = this._link;
-
-        // Check the data binding state
-        const dataBinding = this.dataBinding;
-        if (!dataBinding || dataBinding.state !== 'success') {
-            console.error("Data binding state is not 'success'");
-            return;
-        }
-        console.log("Data binding successful!");
-    }
   }
 
-  customElements.define('com-sap-sac-exercise-aa30', Main);
+  customElements.define('com-sap-sac-jm', Main);
 })();
+
+
