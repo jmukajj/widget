@@ -43,7 +43,7 @@
 
        <div id="root">
           <div class="link-container" id="links-container">
-            <p><a id="link_href" href="#" target="_blank">Download Word Document</a></p>
+            <p><a id="link_href" href="#" target="_blank">Download Text Document</a></p>
           </div>
        </div>
   `;
@@ -61,23 +61,20 @@
 
       // Attach event listener for download link
       this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
-        this.generateWordDocument();
+        this.generateTextDocument();
       });
 
-      // Load external libraries to generate the .docx file
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.0.0/pizzip.min.js')
+      // Load FileSaver.js to save the blob (a small external script for downloads)
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js')
         .then(() => {
-          return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.22.2/docxtemplater.min.js');
-        })
-        .then(() => {
-          console.log("Libraries loaded successfully!");
+          console.log("FileSaver.js loaded successfully!");
         })
         .catch((error) => {
-          console.error("Error loading libraries:", error);
+          console.error("Error loading FileSaver.js:", error);
         });
     }
 
-    // Function to dynamically load external scripts
+    // Function to dynamically load external script
     loadScript(url) {
       return new Promise((resolve, reject) => {
         const script = document.createElement('script');
@@ -105,8 +102,8 @@
       console.log("Post Data after population: ", this._postData);
     }
 
-    // Function to generate a real Word document using docxtemplater and PizZip
-    generateWordDocument() {
+    // Function to generate a simple text document using Blob
+    generateTextDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
       if (!this._postData || Object.keys(this._postData).length === 0) {
@@ -114,53 +111,22 @@
         return;
       }
 
-      // Create an empty Word document using PizZip
-      const zip = new PizZip();
-      const doc = new window.docxtemplater(zip);
+      let content = 'Selected Row Data\n------------------------------\n';
 
-      // Create the content for the Word document
-      const content = `
-        <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-          <w:body>
-            <w:p>
-              <w:r>
-                <w:t>Antrag Document</w:t>
-              </w:r>
-            </w:p>
-            <w:p>
-              <w:r>
-                <w:t>------------------------------</w:t>
-              </w:r>
-            </w:p>
-            ${Object.keys(this._postData).map(key => `
-              <w:p>
-                <w:r>
-                  <w:t>${key}: ${this._postData[key]}</w:t>
-                </w:r>
-              </w:p>
-            `).join('')}
-          </w:body>
-        </w:document>
-      `;
-
-      // Populate the document with the data
-      doc.loadZip(zip);
-      doc.setData(this._postData);
-
-      try {
-        doc.render(); // Render the document
-        const out = doc.getZip().generate({
-          type: "blob",
-          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        });
-
-        // Trigger the download using FileSaver.js
-        saveAs(out, "AntragDocument.docx");
-
-      } catch (error) {
-        console.error("Error rendering the document:", error);
-        alert("Failed to generate the document.");
+      // Dynamically append each field from _postData
+      for (let key in this._postData) {
+        if (this._postData.hasOwnProperty(key)) {
+            content += `${key}: ${this._postData[key]}\n`;
+        }
       }
+
+      console.log("Document content:", content);
+
+      // Create a Blob from the content (text/plain)
+      const blob = new Blob([content], { type: 'text/plain' });
+
+      // Use FileSaver.js to trigger download
+      saveAs(blob, "SelectedRowData.txt");
     }
   }
 
