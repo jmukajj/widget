@@ -88,15 +88,22 @@
 
     // Send post data that includes Antrag information from the table selection
     sendPostData (selectedAntrag) {
-      // The selectedAntrag parameter will now contain the relevant information
+      console.log("Received selected Antrag: ", selectedAntrag);
+      
+      // Ensure selectedAntrag contains the expected properties
+      if (!selectedAntrag || !selectedAntrag.CreatedBy || !selectedAntrag.CreatedOn || !selectedAntrag.TotalAmount) {
+        console.error("Missing necessary Antrag data", selectedAntrag);
+        return;
+      }
+
       this._postData = {
         CreatedBy: selectedAntrag.CreatedBy,
         CreatedOn: selectedAntrag.CreatedOn,
         TotalAmount: selectedAntrag.TotalAmount
       };
 
-      console.log("Selected Antrag Data: ", this._postData); // Add log to confirm postData
-      this.render(); // Trigger the rendering of the widget
+      console.log("Selected Antrag Data after population: ", this._postData); 
+      this.render(); 
     }
 
     // Core rendering function handling both GET and POST requests
@@ -109,8 +116,8 @@
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
-      if (!this._postData) {
-        alert("No data to generate document");
+      if (!this._postData || !this._postData.CreatedBy || !this._postData.CreatedOn || !this._postData.TotalAmount) {
+        alert("No data or incomplete data to generate document");
         return;
       }
 
@@ -124,6 +131,8 @@
         Created On: ${data.CreatedOn}
         Total Amount: ${data.TotalAmount}
       `;
+
+      console.log("Document content:", content);
 
       // Create a Blob from the content
       const blob = new Blob([content], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
