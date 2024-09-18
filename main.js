@@ -86,31 +86,37 @@
       });
     }
 
-    // This function will be called when the user selects a row in the SAC table
+    // This function will be called by SAC when a row is selected in the SAC table
     sendPostData(selectedAntrag) {
       console.log("Received selected Antrag: ", selectedAntrag);
 
-      // Ensure selectedAntrag contains the expected properties, with defaults if missing
+      // Ensure selectedAntrag contains the expected properties
+      if (!selectedAntrag || !selectedAntrag.Konto || !selectedAntrag.Antrag || !selectedAntrag.Wert) {
+        console.error("Missing necessary Antrag data", selectedAntrag);
+
+        // Hardcoding values for testing
+        this._postData = {
+          Konto: "1234",
+          Antrag: "Antrag A",
+          Wert: "5000"
+        };
+        console.log("Using hardcoded test data since no proper data was passed: ", this._postData);
+        return;
+      }
+
       this._postData = {
-        Konto: selectedAntrag.Konto || "Unknown Konto",  // Default value for missing Konto
-        Antrag: selectedAntrag.Antrag || "Unassigned",   // Default value for unassigned Antrag
-        Wert: selectedAntrag.Wert || "0"                 // Default value for missing Wert
+        Konto: selectedAntrag.Konto,
+        Antrag: selectedAntrag.Antrag,
+        Wert: selectedAntrag.Wert
       };
 
       console.log("Selected Antrag Data after population: ", this._postData);
-
-      // If necessary fields are still missing after defaulting, stop document generation
-      if (!this._postData.Konto || !this._postData.Wert) {
-        alert("No data or incomplete data to generate document");
-        return;
-      }
     }
 
     // Function to generate a Word document using Blob
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
-      // Check again for complete data before generating the document
       if (!this._postData || !this._postData.Konto || !this._postData.Antrag || !this._postData.Wert) {
         alert("No data or incomplete data to generate document");
         return;
