@@ -92,6 +92,7 @@
 
       // Ensure selectedAntrag contains the expected properties
       if (!selectedAntrag || !selectedAntrag.Konto || !selectedAntrag.Antrag || !selectedAntrag.Wert) {
+        console.log("Selected row data:", selectedAntrag); 
         console.error("Missing necessary Antrag data", selectedAntrag);
 
         // Hardcoding values for testing
