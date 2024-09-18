@@ -1,13 +1,52 @@
 (function () {
   const template = document.createElement('template');
   template.innerHTML = `
-        <style>
-        </style>
-        
-        <div id="root" style="width: 100%; height: 100%;">
-          <p><a id = "link_href" href="#" target="_blank" >Download Word Document</a></p>
-        </div>
-      `;
+       <style>
+        #root {
+            width: 300px;
+            justify-content: flex-start;
+            align-items: flex-start;
+            height: 100vh; /* Ensure the div takes the full height of the viewport */
+        }
+        .link-container {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: left;
+            left: 7px;
+            align-items: left;
+            padding: 20px;
+            border: 0.5px solid black;
+            background-color: #FCFCFC;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, .3);
+        }
+        .link-container::before {
+            content: '';
+            position: absolute;
+            left: -5.5px;
+            top: 50%;
+            transform: translateY(-50%) rotate(135deg);
+            border: solid black;
+            border-width: 0 0.5px 0.5px 0;
+            display: inline-block;
+            padding: 5px;
+            background-color: #FCFCFC;
+        }
+        .link {
+            text-decoration: none;
+            color: #5E97C4;
+            font-family: Arial, sans-serif;
+            margin-bottom: 10px;
+            display: block; /* Ensures each link starts on a new line */
+        }
+       </style>
+
+       <div id="root">
+          <div class="link-container" id="links-container">
+            <p><a id="link_href" href="#" target="_blank">Download Word Document</a></p>
+          </div>
+       </div>
+  `;
 
   class Main extends HTMLElement {
     constructor () {
@@ -22,7 +61,7 @@
         this.generateWordDocument();
       });
 
-      // Load the scripts in sequence
+      // Load external scripts in sequence
       this.loadScriptsInOrder([
         'https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js',
         'https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.0/docxtemplater.js',
@@ -89,15 +128,6 @@
     getLink () {
       return this._link;
     }
-
-    // Widget resizing
-    onCustomWidgetResize (width, height) {}
-
-    // Widget update event
-    onCustomWidgetAfterUpdate (changedProps) {}
-
-    // Widget destroy event
-    onCustomWidgetDestroy () {}
 
     // Core rendering function handling both GET and POST requests
     async render () {
