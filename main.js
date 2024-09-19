@@ -104,43 +104,42 @@
 
     // Function to generate a Word document using docx
     generateWordDocument() {
-      console.log('Generating document with Post Data:', this._postData);
-
-      if (!this._postData || Object.keys(this._postData).length === 0) {
-        alert("No data to generate document");
-        return;
-      }
-
-      // Create a new document
-      const { Document, Packer, Paragraph, TextRun } = window.docx;
-      const doc = new Document();
-
-      // Add a title paragraph
-      doc.addSection({
-        children: [
-          new Paragraph({
-            children: [new TextRun({ text: 'Antrag Document', bold: true, size: 32 })],
-          }),
-          new Paragraph({
-            children: [new TextRun({ text: '------------------------------', bold: true, size: 24 })],
-          }),
-          ...Object.keys(this._postData).map(key => 
-            new Paragraph({
-              children: [new TextRun({ text: `${key}: ${this._postData[key]}`, size: 24 })],
-            })
-          )
-        ],
-      });
-
-      // Generate the Word document and trigger the download
-      Packer.toBlob(doc).then(blob => {
-        saveAs(blob, "AntragDocument.docx");
-      }).catch(error => {
-        console.error("Error generating the document:", error);
-        alert("Failed to generate the document.");
-      });
+    console.log('Generating document with Post Data:', this._postData);
+  
+    if (!this._postData || Object.keys(this._postData).length === 0) {
+      alert("No data to generate document");
+      return;
     }
+  
+    // Construct simple Word document XML content
+    const docContent = `
+      <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+        <w:body>
+          <w:p>
+            <w:r>
+              <w:t>Antrag Document</w:t>
+            </w:r>
+          </w:p>
+          <w:p>
+            <w:r>
+              <w:t>------------------------------</w:t>
+            </w:r>
+          </w:p>
+          ${Object.keys(this._postData).map(key => `
+            <w:p>
+              <w:r>
+                <w:t>${key}: ${this._postData[key]}</w:t>
+              </w:r>
+            </w:p>
+          `).join('')}
+        </w:body>
+      </w:document>
+    `;
+  
+    // Convert XML content to a Blob with correct MIME type
+    const blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+  
+    // Trigger download using FileSaver.js or directly through browser
+    saveAs(blob, "AntragDocument.docx");
   }
 
-  customElements.define('com-sap-sac-jm', Main);
-})();
