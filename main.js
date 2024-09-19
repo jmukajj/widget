@@ -116,8 +116,8 @@
       console.log("Post Data with column names and values: ", this._postData);
     }
 
-    // Function to generate a simple text document using Blob
-    generateTextDocument() {
+    // Function to generate a real Word document using docxtemplater and PizZip
+    generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
       if (!this._postData || Object.keys(this._postData).length === 0) {
@@ -125,24 +125,56 @@
         return;
       }
 
-      let content = 'Selected Row Data\n------------------------------\n';
+      // Create an empty Word document using PizZip
+      const zip = new PizZip();
+      const doc = new window.docxtemplater(zip);
 
-      // Dynamically append each field (column name) and its corresponding value
-      for (let key in this._postData) {
-        if (this._postData.hasOwnProperty(key)) {
-            content += `${key}: ${this._postData[key]}\n`;
-        }
+      // Create the content for the Word document
+      const content = `
+        <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+          <w:body>
+            <w:p>
+              <w:r>
+                <w:t>Antrag Document</w:t>
+              </w:r>
+            </w:p>
+            <w:p>
+              <w:r>
+                <w:t>------------------------------</w:t>
+              </w:r>
+            </w:p>
+            ${Object.keys(this._postData).map(key => `
+              <w:p>
+                <w:r>
+                  <w:t>${key}: ${this._postData[key]}</w:t>
+                </w:r>
+              </w:p>
+            `).join('')}
+          </w:body>
+        </w:document>
+      `;
+
+      // Populate the document with the data
+      doc.loadZip(zip);
+      doc.setData(this._postData);
+
+      try {
+        doc.render(); // Render the document
+        const out = doc.getZip().generate({
+          type: "blob",
+          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        });
+
+        // Trigger the download using FileSaver.js
+        saveAs(out, "AntragDocument.docx");
+
+      } catch (error) {
+        console.error("Error rendering the document:", error);
+        alert("Failed to generate the document.");
       }
-
-      console.log("Document content:", content);
-
-      // Create a Blob from the content (text/plain)
-      const blob = new Blob([content], { type: 'text/plain' });
-
-      // Use FileSaver.js to trigger download
-      saveAs(blob, "SelectedRowData.txt");
     }
   }
 
   customElements.define('com-sap-sac-jm', Main);
 })();
+
