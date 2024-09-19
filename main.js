@@ -61,7 +61,7 @@
 
       // Attach event listener for download link
       this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
-        this.generateTextDocument();
+        this.generateWordDocument();
       });
 
       // Load FileSaver.js to save the blob (a small external script for downloads)
