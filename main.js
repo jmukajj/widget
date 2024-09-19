@@ -64,10 +64,14 @@
         this.generateWordDocument();
       });
 
-      // Load external library (docx) to generate the .docx file
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.umd.min.js')
+      // Try to load the docx library dynamically
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.umd.min.js') // Use the most recent version
         .then(() => {
-          console.log("docx library loaded successfully!");
+          if (window.docx) {
+            console.log("docx library loaded successfully!", window.docx);
+          } else {
+            console.error("docx library failed to load.");
+          }
         })
         .catch((error) => {
           console.error("Error loading docx library:", error);
@@ -102,15 +106,15 @@
       console.log("Post Data after population: ", this._postData);
     }
 
-    // Function to generate a Word document using docx
-    generateWordDocument() {
+    // Fallback approach: Function to generate a basic Word document using Blob
+    generateWordDocumentFallback() {
       console.log('Generating document with Post Data:', this._postData);
-    
+
       if (!this._postData || Object.keys(this._postData).length === 0) {
         alert("No data to generate document");
         return;
       }
-    
+
       // Construct simple Word document XML content
       const docContent = `
         <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
@@ -135,11 +139,60 @@
           </w:body>
         </w:document>
       `;
-    
+
       // Convert XML content to a Blob with correct MIME type
       const blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-    
+
       // Trigger download using FileSaver.js or directly through browser
       saveAs(blob, "AntragDocument.docx");
     }
 
+    // Function to generate a Word document using docx (if the library is loaded)
+    generateWordDocument() {
+      if (!window.docx) {
+        console.error("docx library is not loaded, falling back to XML document.");
+        this.generateWordDocumentFallback();  // Fallback to manual method if docx is not available
+        return;
+      }
+
+      console.log('Generating document with Post Data:', this._postData);
+
+      if (!this._postData || Object.keys(this._postData).length === 0) {
+        alert("No data to generate document");
+        return;
+      }
+
+      const { Document, Packer, Paragraph, TextRun } = window.docx;
+      
+      // Create a new document
+      const doc = new Document();
+
+      // Add a title paragraph
+      doc.addSection({
+        children: [
+          new Paragraph({
+            children: [new TextRun({ text: 'Antrag Document', bold: true, size: 32 })],
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: '------------------------------', bold: true, size: 24 })],
+          }),
+          ...Object.keys(this._postData).map(key => 
+            new Paragraph({
+              children: [new TextRun({ text: `${key}: ${this._postData[key]}`, size: 24 })],
+            })
+          )
+        ],
+      });
+
+      // Generate the Word document and trigger the download
+      Packer.toBlob(doc).then(blob => {
+        saveAs(blob, "AntragDocument.docx");
+      }).catch(error => {
+        console.error("Error generating the document:", error);
+        alert("Failed to generate the document.");
+      });
+    }
+  }
+
+  customElements.define('com-sap-sac-jm', Main);
+})();
