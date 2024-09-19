@@ -43,7 +43,7 @@
 
        <div id="root">
           <div class="link-container" id="links-container">
-            <p><a id="link_href" href="#" target="_blank">Download Text Document</a></p>
+            <p><a id="link_href" href="#" target="_blank">Download Word Document</a></p>
           </div>
        </div>
   `;
@@ -64,25 +64,20 @@
         this.generateWordDocument();
       });
 
-      // Load necessary libraries sequentially
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js')
+      // Load external libraries to generate the .docx file
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.0.0/pizzip.min.js')
         .then(() => {
-          console.log("FileSaver.js loaded successfully!");
-          return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js');
+          return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.22.2/docxtemplater.min.js');
         })
         .then(() => {
-          console.log("PizZip loaded successfully!");
-          return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.22.0/docxtemplater.js');
-        })
-        .then(() => {
-          console.log("docxtemplater loaded successfully!");
+          console.log("Libraries loaded successfully!");
         })
         .catch((error) => {
-          console.error("Error loading script:", error);
+          console.error("Error loading libraries:", error);
         });
     }
 
-    // Function to dynamically load external script
+    // Function to dynamically load external scripts
     loadScript(url) {
       return new Promise((resolve, reject) => {
         const script = document.createElement('script');
@@ -98,40 +93,20 @@
     sendPostData(selectedRowData) {
       console.log("Received selected row data: ", selectedRowData);
 
-      // Check if there is valid data in selectedRowData
+      // Ensure selectedRowData contains valid data
       if (!selectedRowData || Object.keys(selectedRowData).length === 0) {
         console.error("No data provided in selected row", selectedRowData);
         alert("No data to generate document");
         return;
       }
 
-      // Create an object to store the column names and their values
-      const rowDataWithValues = {};
-      for (let key in selectedRowData) {
-        if (selectedRowData.hasOwnProperty(key)) {
-          // If the key holds an object with a `value` property, use the `value`
-          if (selectedRowData[key].value) {
-            rowDataWithValues[key] = selectedRowData[key].value;
-          } else {
-            // Otherwise, assume the raw value is needed
-            rowDataWithValues[key] = selectedRowData[key];
-          }
-        }
-      }
+      this._postData = selectedRowData; // Store all selected data for the document generation
 
-      this._postData = rowDataWithValues; // Store the human-readable data for document generation
-
-      console.log("Post Data with column names and values: ", this._postData);
+      console.log("Post Data after population: ", this._postData);
     }
 
-    // Function to generate a Word document using docxtemplater and PizZip
+    // Function to generate a real Word document using docxtemplater and PizZip
     generateWordDocument() {
-      if (typeof PizZip === 'undefined' || typeof window.docxtemplater === 'undefined') {
-        console.error("Required libraries are not loaded yet.");
-        alert("The document generation libraries have not been loaded yet. Please try again.");
-        return;
-      }
-
       console.log('Generating document with Post Data:', this._postData);
 
       if (!this._postData || Object.keys(this._postData).length === 0) {
@@ -168,6 +143,7 @@
         </w:document>
       `;
 
+      // Populate the document with the data
       doc.loadZip(zip);
       doc.setData(this._postData);
 
