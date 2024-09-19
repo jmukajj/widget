@@ -64,16 +64,13 @@
         this.generateWordDocument();
       });
 
-      // Load external libraries to generate the .docx file
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.0.0/pizzip.min.js')
+      // Load external library (docx) to generate the .docx file
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/6.1.0/docx.min.js')
         .then(() => {
-          return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.22.2/docxtemplater.min.js');
-        })
-        .then(() => {
-          console.log("Libraries loaded successfully!");
+          console.log("docx library loaded successfully!");
         })
         .catch((error) => {
-          console.error("Error loading libraries:", error);
+          console.error("Error loading docx library:", error);
         });
     }
 
@@ -105,7 +102,7 @@
       console.log("Post Data after population: ", this._postData);
     }
 
-    // Function to generate a real Word document using docxtemplater and PizZip
+    // Function to generate a Word document using docx
     generateWordDocument() {
       console.log('Generating document with Post Data:', this._postData);
 
@@ -114,53 +111,34 @@
         return;
       }
 
-      // Create an empty Word document using PizZip
-      const zip = new PizZip();
-      const doc = new window.docxtemplater(zip);
+      // Create a new document
+      const { Document, Packer, Paragraph, TextRun } = window.docx;
+      const doc = new Document();
 
-      // Create the content for the Word document
-      const content = `
-        <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-          <w:body>
-            <w:p>
-              <w:r>
-                <w:t>Antrag Document</w:t>
-              </w:r>
-            </w:p>
-            <w:p>
-              <w:r>
-                <w:t>------------------------------</w:t>
-              </w:r>
-            </w:p>
-            ${Object.keys(this._postData).map(key => `
-              <w:p>
-                <w:r>
-                  <w:t>${key}: ${this._postData[key]}</w:t>
-                </w:r>
-              </w:p>
-            `).join('')}
-          </w:body>
-        </w:document>
-      `;
+      // Add a title paragraph
+      doc.addSection({
+        children: [
+          new Paragraph({
+            children: [new TextRun({ text: 'Antrag Document', bold: true, size: 32 })],
+          }),
+          new Paragraph({
+            children: [new TextRun({ text: '------------------------------', bold: true, size: 24 })],
+          }),
+          ...Object.keys(this._postData).map(key => 
+            new Paragraph({
+              children: [new TextRun({ text: `${key}: ${this._postData[key]}`, size: 24 })],
+            })
+          )
+        ],
+      });
 
-      // Populate the document with the data
-      doc.loadZip(zip);
-      doc.setData(this._postData);
-
-      try {
-        doc.render(); // Render the document
-        const out = doc.getZip().generate({
-          type: "blob",
-          mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        });
-
-        // Trigger the download using FileSaver.js
-        saveAs(out, "AntragDocument.docx");
-
-      } catch (error) {
-        console.error("Error rendering the document:", error);
+      // Generate the Word document and trigger the download
+      Packer.toBlob(doc).then(blob => {
+        saveAs(blob, "AntragDocument.docx");
+      }).catch(error => {
+        console.error("Error generating the document:", error);
         alert("Failed to generate the document.");
-      }
+      });
     }
   }
 
