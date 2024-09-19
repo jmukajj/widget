@@ -64,8 +64,8 @@
         this.generateWordDocument();
       });
 
-      // Try to load the docx library dynamically
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.umd.min.js') // Use the most recent version
+      // Load docx library dynamically
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.umd.min.js')
         .then(() => {
           if (window.docx) {
             console.log("docx library loaded successfully!", window.docx);
@@ -75,6 +75,15 @@
         })
         .catch((error) => {
           console.error("Error loading docx library:", error);
+        });
+
+      // Load FileSaver.js library dynamically
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js')
+        .then(() => {
+          console.log("FileSaver.js library loaded successfully!");
+        })
+        .catch((error) => {
+          console.error("Error loading FileSaver.js library:", error);
         });
     }
 
@@ -143,7 +152,7 @@
       // Convert XML content to a Blob with correct MIME type
       const blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
 
-      // Trigger download using FileSaver.js or directly through browser
+      // Trigger download using FileSaver.js
       saveAs(blob, "AntragDocument.docx");
     }
 
