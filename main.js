@@ -104,42 +104,42 @@
 
     // Function to generate a Word document using docx
     generateWordDocument() {
-    console.log('Generating document with Post Data:', this._postData);
-  
-    if (!this._postData || Object.keys(this._postData).length === 0) {
-      alert("No data to generate document");
-      return;
-    }
-  
-    // Construct simple Word document XML content
-    const docContent = `
-      <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
-        <w:body>
-          <w:p>
-            <w:r>
-              <w:t>Antrag Document</w:t>
-            </w:r>
-          </w:p>
-          <w:p>
-            <w:r>
-              <w:t>------------------------------</w:t>
-            </w:r>
-          </w:p>
-          ${Object.keys(this._postData).map(key => `
+      console.log('Generating document with Post Data:', this._postData);
+    
+      if (!this._postData || Object.keys(this._postData).length === 0) {
+        alert("No data to generate document");
+        return;
+      }
+    
+      // Construct simple Word document XML content
+      const docContent = `
+        <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+          <w:body>
             <w:p>
               <w:r>
-                <w:t>${key}: ${this._postData[key]}</w:t>
+                <w:t>Antrag Document</w:t>
               </w:r>
             </w:p>
-          `).join('')}
-        </w:body>
-      </w:document>
-    `;
-  
-    // Convert XML content to a Blob with correct MIME type
-    const blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-  
-    // Trigger download using FileSaver.js or directly through browser
-    saveAs(blob, "AntragDocument.docx");
-  }
+            <w:p>
+              <w:r>
+                <w:t>------------------------------</w:t>
+              </w:r>
+            </w:p>
+            ${Object.keys(this._postData).map(key => `
+              <w:p>
+                <w:r>
+                  <w:t>${key}: ${this._postData[key]}</w:t>
+                </w:r>
+              </w:p>
+            `).join('')}
+          </w:body>
+        </w:document>
+      `;
+    
+      // Convert XML content to a Blob with correct MIME type
+      const blob = new Blob([docContent], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    
+      // Trigger download using FileSaver.js or directly through browser
+      saveAs(blob, "AntragDocument.docx");
+    }
 
