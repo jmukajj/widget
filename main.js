@@ -65,7 +65,7 @@
       });
 
       // Load external library (docx) to generate the .docx file
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/6.1.0/docx.min.js')
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.umd.min.js')
         .then(() => {
           console.log("docx library loaded successfully!");
         })
