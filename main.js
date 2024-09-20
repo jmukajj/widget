@@ -77,7 +77,7 @@
           console.error("Error loading docx library:", error);
         });
 
-      // Load FileSaver.js library dynamically
+      // Load FileSaver.js library dynamically for triggering file downloads
       this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js')
         .then(() => {
           console.log("FileSaver.js library loaded successfully!");
