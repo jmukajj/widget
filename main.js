@@ -103,7 +103,7 @@
     sendPostData(selectedRowData) {
       console.log("Received selected row data: ", selectedRowData);
 
-      // Ensure selectedRowData contains valid data
+      // Ensure selectedRowData contains valid data,an object containing row data
       if (!selectedRowData || Object.keys(selectedRowData).length === 0) {
         console.error("No data provided in selected row", selectedRowData);
         alert("No data to generate document");
@@ -173,7 +173,7 @@
 
       const { Document, Packer, Paragraph, TextRun } = window.docx;
       
-      // Create a new document
+      // Create a new document, 
       const doc = new Document();
 
       // Add a title paragraph
