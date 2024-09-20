@@ -99,7 +99,7 @@
       });
     }
 
-    // This function will be called when the user selects a row in the SAC table
+    // This function will be called when the user selects a row in the SAC table, to pass selected data from the SAC table into the widget.
     sendPostData(selectedRowData) {
       console.log("Received selected row data: ", selectedRowData);
 
