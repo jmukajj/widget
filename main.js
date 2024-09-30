@@ -49,7 +49,7 @@
   `;
 
   class Main extends HTMLElement {
-    constructor () {
+    constructor() {
       super();
       console.log('Widget initialized');
       this._shadowRoot = this.attachShadow({ mode: 'open' });
@@ -58,7 +58,7 @@
       this._postData = {};
 
       this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
-        this.generateAndUploadDocument();
+        this.generateAndDownloadDocument();
       });
 
       // Load the libraries in the correct order
@@ -101,27 +101,30 @@
       console.log("Post Data after population: ", this._postData);
     }
 
-    generateAndUploadDocument() {
+    generateAndDownloadDocument() {
       const data = this._postData;
       if (!data || Object.keys(data).length === 0) {
         alert("No data to generate document");
         return;
       }
 
+      // Fetch the Word template, populate it, and trigger the download
       fetchWordTemplate()
         .then(templateBlob => populateWordTemplate(templateBlob, data))
-        .then(populatedDocument => uploadToGithub(populatedDocument, 'populated_document.docx'))
-        .catch(error => console.error("Error generating and uploading document:", error));
+        .then(populatedDocument => {
+          saveAs(populatedDocument, 'populated_document.docx'); // Use FileSaver.js to save locally
+        })
+        .catch(error => console.error("Error generating document:", error));
     }
   }
 
   customElements.define('com-sap-sac-jm', Main);
 
-   // Fetch the Word Template from your GitHub Repo using a CORS Proxy
+  // Fetch the Word Template from your GitHub Repo using a CORS Proxy
   async function fetchWordTemplate() {
     try {
       const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-      const templateUrl = 'https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx;
+      const templateUrl = 'https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx';
       const response = await fetch(proxyUrl + templateUrl, {
         headers: {
           'Origin': 'https://itsvac-test.eu20.hcs.cloud.sap'
@@ -175,35 +178,5 @@
       };
       reader.readAsArrayBuffer(templateBlob);
     });
-  }
-
-  // Upload the Document to GitHub
-  async function uploadToGithub(fileBlob, fileName) {
-    const fileReader = new FileReader();
-    fileReader.onloadend = async function () {
-      const content = fileReader.result.split(',')[1];
-      const data = {
-        message: `Upload ${fileName}`,
-        content: content,
-        branch: "main"
-      };
-
-      // GitHub API Request
-      const response = await fetch(`https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx`, {
-        method: "PUT",
-        headers: {
-          "Authorization": `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`, // Replace with your GitHub Token
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(data)
-      });
-
-      if (response.ok) {
-        console.log(`${fileName} uploaded successfully.`);
-      } else {
-        console.error('Upload failed:', response.statusText);
-      }
-    };
-    fileReader.readAsDataURL(fileBlob);
   }
 })();
