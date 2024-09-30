@@ -140,7 +140,7 @@
     }
   }
 
-  // Populate the Word Template by looping through paragraphs
+  // Populate the Word Template
   function populateWordTemplate(templateBlob, data) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -158,35 +158,35 @@
           return reject(error);
         }
 
-        // Set the template variables
-        doc.setData({
-          AccountDescription: data.AccountDescription || '',
-          Antrag: data.Antrag || '',
+        // Loop through paragraphs and set values dynamically
+        const paragraphs = doc.getFullText().split('\n');
+        const updatedParagraphs = paragraphs.map(paragraph => {
+          let updatedParagraph = paragraph;
+          Object.keys(data).forEach(key => {
+            const placeholder = `{{${key}}}`;
+            if (updatedParagraph.includes(placeholder)) {
+              updatedParagraph = updatedParagraph.replace(new RegExp(placeholder, 'g'), data[key] || '');
+            }
+          });
+          return updatedParagraph;
         });
 
+        // Set updated paragraphs back in document
         try {
-          // Render the document
-          doc.render();
-
-          // Loop through paragraphs and replace placeholders
-          const paragraphs = doc.getFullText().split('\n');
-          for (let i = 0; i < paragraphs.length; i++) {
-            if (paragraphs[i].includes('{{AccountDescription}}')) {
-              paragraphs[i] = paragraphs[i].replace('{{AccountDescription}}', data.AccountDescription || '');
-            }
-            if (paragraphs[i].includes('{{Antrag}}')) {
-              paragraphs[i] = paragraphs[i].replace('{{Antrag}}', data.Antrag || '');
-            }
-          }
-
-          const out = doc.getZip().generate({
-            type: 'blob',
-            mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          doc.loadZip(new PizZip(zip.generate({ type: 'arraybuffer' })));
+          updatedParagraphs.forEach((text, index) => {
+            doc.setData({ [`paragraph_${index}`]: text });
           });
-          resolve(out);
+          doc.render();
         } catch (error) {
           return reject(error);
         }
+
+        const out = doc.getZip().generate({
+          type: 'blob',
+          mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        });
+        resolve(out);
       };
       reader.readAsArrayBuffer(templateBlob);
     });
