@@ -173,7 +173,7 @@
       const response = await fetch(`https://jmukajj.github.io/widget/template.docx`, {
         method: "PUT",
         headers: {
-          "Authorization": `token YOUR_GITHUB_TOKEN`, // Replace with your GitHub Token
+          "Authorization": `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`, // Replace with your GitHub Token
           "Content-Type": "application/json"
         },
         body: JSON.stringify(data)
