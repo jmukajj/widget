@@ -61,25 +61,29 @@
         this.generateAndUploadDocument();
       });
 
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.umd.min.js')
-        .then(() => {
-          if (window.docx) {
-            this.docx = window.docx;
-            console.log("docx library loaded successfully!", window.docx);
-          } else {
-            console.error("docx library failed to load.");
-          }
-        })
-        .catch((error) => {
-          console.error("Error loading docx library:", error);
-        });
-
       this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js')
         .then(() => {
           console.log("FileSaver.js library loaded successfully!");
         })
         .catch((error) => {
           console.error("Error loading FileSaver.js library:", error);
+        });
+      
+      // Load additional libraries needed
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.0.6/pizzip.min.js')
+        .then(() => {
+          console.log("PizZip library loaded successfully!");
+        })
+        .catch((error) => {
+          console.error("Error loading PizZip library:", error);
+        });
+
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.2/docxtemplater.min.js')
+        .then(() => {
+          console.log("docxtemplater library loaded successfully!");
+        })
+        .catch((error) => {
+          console.error("Error loading docxtemplater library:", error);
         });
     }
 
@@ -124,8 +128,10 @@
   // Fetch the Word Template from your GitHub Repo
   async function fetchWordTemplate() {
     const response = await fetch('https://jmukajj.github.io/widget/template.docx');
-    const templateBlob = await response.blob();
-    return templateBlob;
+    if (!response.ok) {
+      throw new Error('Failed to fetch the Word template');
+    }
+    return await response.blob();
   }
 
   // Populate the Word Template
@@ -134,25 +140,35 @@
       const reader = new FileReader();
       reader.onload = function (event) {
         const arrayBuffer = event.target.result;
-        const doc = new window.docx.Document(arrayBuffer);
+        const zip = new PizZip(arrayBuffer);
 
-        // Loop through paragraphs and replace placeholders
-        doc.getSections()[0].getChildren().forEach((paragraph) => {
-          const text = paragraph.getText();
-          if (text.includes('{{AccountDescription}}')) {
-            paragraph.replaceText('{{AccountDescription}}', data.AccountDescription);
-          }
-          if (text.includes('{{Antrag}}')) {
-            paragraph.replaceText('{{Antrag}}', data.Antrag);
-          }
+        let doc;
+        try {
+          doc = new window.docxtemplater(zip, {
+            paragraphLoop: true,
+            linebreaks: true,
+          });
+        } catch (error) {
+          return reject(error);
+        }
+
+        // Set the template variables
+        doc.setData({
+          AccountDescription: data.AccountDescription || '',
+          Antrag: data.Antrag || '',
         });
 
-        // Generate the populated document
-        window.docx.Packer.toBlob(doc).then(blob => {
-          resolve(blob);
-        }).catch(error => {
-          reject(error);
+        try {
+          doc.render();
+        } catch (error) {
+          return reject(error);
+        }
+
+        const out = doc.getZip().generate({
+          type: 'blob',
+          mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         });
+        resolve(out);
       };
       reader.readAsArrayBuffer(templateBlob);
     });
