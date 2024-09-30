@@ -64,6 +64,7 @@
       this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/7.1.0/docx.umd.min.js')
         .then(() => {
           if (window.docx) {
+            this.docx = window.docx;
             console.log("docx library loaded successfully!", window.docx);
           } else {
             console.error("docx library failed to load.");
