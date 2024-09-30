@@ -170,7 +170,7 @@
       };
 
       // GitHub API Request
-      const response = await fetch(`https://api.github.com/repos/jmukajj/widget/contents/${fileName}`, {
+      const response = await fetch(`https://jmukajj.github.io/widget/template.docx`, {
         method: "PUT",
         headers: {
           "Authorization": `token YOUR_GITHUB_TOKEN`, // Replace with your GitHub Token
