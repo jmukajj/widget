@@ -140,7 +140,7 @@
     }
   }
 
-  // Populate the Word Template
+  // Populate the Word Template by looping through paragraphs
   function populateWordTemplate(templateBlob, data) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -165,16 +165,28 @@
         });
 
         try {
+          // Render the document
           doc.render();
+
+          // Loop through paragraphs and replace placeholders
+          const paragraphs = doc.getFullText().split('\n');
+          for (let i = 0; i < paragraphs.length; i++) {
+            if (paragraphs[i].includes('{{AccountDescription}}')) {
+              paragraphs[i] = paragraphs[i].replace('{{AccountDescription}}', data.AccountDescription || '');
+            }
+            if (paragraphs[i].includes('{{Antrag}}')) {
+              paragraphs[i] = paragraphs[i].replace('{{Antrag}}', data.Antrag || '');
+            }
+          }
+
+          const out = doc.getZip().generate({
+            type: 'blob',
+            mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          });
+          resolve(out);
         } catch (error) {
           return reject(error);
         }
-
-        const out = doc.getZip().generate({
-          type: 'blob',
-          mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        });
-        resolve(out);
       };
       reader.readAsArrayBuffer(templateBlob);
     });
