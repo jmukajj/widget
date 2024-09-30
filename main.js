@@ -117,13 +117,24 @@
 
   customElements.define('com-sap-sac-jm', Main);
 
-  // Fetch the Word Template from your GitHub Repo
+   // Fetch the Word Template from your GitHub Repo using a CORS Proxy
   async function fetchWordTemplate() {
-    const response = await fetch('https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx');
-    if (!response.ok) {
-      throw new Error('Failed to fetch the Word template');
+    try {
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const templateUrl = 'https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx;
+      const response = await fetch(proxyUrl + templateUrl, {
+        headers: {
+          'Origin': 'https://itsvac-test.eu20.hcs.cloud.sap'
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to fetch the Word template: ${response.statusText}`);
+      }
+      return await response.blob();
+    } catch (error) {
+      console.error('Error fetching template:', error);
+      throw error;
     }
-    return await response.blob();
   }
 
   // Populate the Word Template
