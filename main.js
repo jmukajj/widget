@@ -147,7 +147,7 @@
       reader.onload = function (event) {
         const arrayBuffer = event.target.result;
         const zip = new PizZip(arrayBuffer);
-
+  
         let doc;
         try {
           doc = new window.docxtemplater(zip, {
@@ -155,40 +155,53 @@
             linebreaks: true,
           });
         } catch (error) {
+          console.error("Error initializing docxtemplater:", error);
           return reject(error);
         }
-
-        // Loop through paragraphs and set values dynamically
-        const paragraphs = doc.getFullText().split('\n');
-        const updatedParagraphs = paragraphs.map(paragraph => {
-          let updatedParagraph = paragraph;
-          Object.keys(data).forEach(key => {
-            const placeholder = `{{${key}}}`;
-            if (updatedParagraph.includes(placeholder)) {
-              updatedParagraph = updatedParagraph.replace(new RegExp(placeholder, 'g'), data[key] || '');
-            }
-          });
-          return updatedParagraph;
+  
+        // Ensure data is not undefined or null
+        if (!data || typeof data !== 'object') {
+          console.error("Data for template is invalid:", data);
+          return reject(new Error("Data for template is invalid."));
+        }
+  
+        // Sanitize data to avoid undefined or null values
+        const sanitizedData = {};
+        Object.keys(data).forEach(key => {
+          sanitizedData[key] = data[key] !== undefined && data[key] !== null ? data[key] : '';
         });
-
-        // Set updated paragraphs back in document
+  
+        // Set the template variables
         try {
-          doc.loadZip(new PizZip(zip.generate({ type: 'arraybuffer' })));
-          updatedParagraphs.forEach((text, index) => {
-            doc.setData({ [`paragraph_${index}`]: text });
-          });
+          console.log("Data passed to docxtemplater:", sanitizedData);
+          doc.setData(sanitizedData);
+        } catch (error) {
+          console.error("Error setting data for docxtemplater:", error);
+          return reject(error);
+        }
+  
+        // Render the document
+        try {
           doc.render();
         } catch (error) {
+          if (error.properties && error.properties.errors) {
+            console.error("Errors in the template:", error.properties.errors);
+          } else {
+            console.error("Error rendering document:", error);
+          }
           return reject(error);
         }
-
+  
+        // Generate the final output
         const out = doc.getZip().generate({
           type: 'blob',
           mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         });
+  
         resolve(out);
       };
       reader.readAsArrayBuffer(templateBlob);
     });
   }
+
 })();
