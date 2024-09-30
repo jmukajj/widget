@@ -119,7 +119,7 @@
 
   // Fetch the Word Template from your GitHub Repo
   async function fetchWordTemplate() {
-    const response = await fetch('https://jmukajj.github.io/widget/template.docx');
+    const response = await fetch('https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx');
     if (!response.ok) {
       throw new Error('Failed to fetch the Word template');
     }
@@ -178,7 +178,7 @@
       };
 
       // GitHub API Request
-      const response = await fetch(`https://jmukajj.github.io/widget/template.docx`, {
+      const response = await fetch(`https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx`, {
         method: "PUT",
         headers: {
           "Authorization": `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`, // Replace with your GitHub Token
