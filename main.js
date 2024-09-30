@@ -123,7 +123,7 @@
   // Fetch the Word Template from your GitHub Repo using a CORS Proxy
   async function fetchWordTemplate() {
     try {
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const proxyUrl = 'https://corsproxy.io/?';
       const templateUrl = 'https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx';
       const response = await fetch(proxyUrl + templateUrl, {
         headers: {
