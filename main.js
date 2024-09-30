@@ -61,29 +61,21 @@
         this.generateAndUploadDocument();
       });
 
+      // Load the libraries in the correct order
       this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js')
         .then(() => {
           console.log("FileSaver.js library loaded successfully!");
+          return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.0.6/pizzip.min.js');
         })
-        .catch((error) => {
-          console.error("Error loading FileSaver.js library:", error);
-        });
-      
-      // Load additional libraries needed
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.0.6/pizzip.min.js')
         .then(() => {
           console.log("PizZip library loaded successfully!");
+          return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.2/docxtemplater.min.js');
         })
-        .catch((error) => {
-          console.error("Error loading PizZip library:", error);
-        });
-
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.2/docxtemplater.min.js')
         .then(() => {
           console.log("docxtemplater library loaded successfully!");
         })
         .catch((error) => {
-          console.error("Error loading docxtemplater library:", error);
+          console.error("Error loading a library:", error);
         });
     }
 
