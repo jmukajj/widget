@@ -53,18 +53,21 @@
       super();
       console.log('Widget initialized');
       this._shadowRoot = this.attachShadow({ mode: 'open' });
-      this._shadowRoot.appendChild(template.content.cloneNode(true));
       this.Response = null;
       this._postData = {};
+    }
 
-    connectedCallback(){
-      console.log("Widget connected to the DOM");
+    connectedCallback() {
+      console.log('Widget connected to the DOM');
       this._shadowRoot.appendChild(template.content.cloneNode(true));
 
+      // Attach event listener after the template is attached
       this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
         this.generateAndUploadDocument();
       });
-      this.loadLibrariesinOrder();
+
+      // Load the libraries in the correct order
+      this.loadLibrariesInOrder();
     }
 
     loadLibrariesInOrder() {
