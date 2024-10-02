@@ -64,6 +64,10 @@
       this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js')
         .then(() => {
           console.log("mammoth.js library loaded successfully!");
+          return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js');
+        })
+        .then(() => {
+          console.log("PizZip library loaded successfully!");
           return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.2/docxtemplater.min.js');
         })
         .then(() => {
@@ -153,9 +157,14 @@
 
     createWordDocumentFromHtml(htmlContent) {
       try {
-        // Create a new docxtemplater document with the updated HTML content
+        // Create a new PizZip instance
         const zip = new PizZip();
-        const doc = new window.docxtemplater(zip);
+
+        // Create a new docxtemplater document with the updated HTML content
+        const doc = new window.docxtemplater(zip, {
+          paragraphLoop: true,
+          linebreaks: true,
+        });
 
         // Inject the updated content into the document
         doc.loadZip(zip);
