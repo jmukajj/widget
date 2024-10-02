@@ -159,8 +159,15 @@
       const reader = new FileReader();
       reader.onload = function (event) {
         const arrayBuffer = event.target.result;
-        const zip = new PizZip(arrayBuffer);
-  
+        
+        let zip;
+        try {
+          zip = new PizZip(arrayBuffer);
+        } catch (error) {
+          console.error("Error reading the array buffer with PizZip:", error);
+          return reject(error);
+        }
+    
         let doc;
         try {
           doc = new window.docxtemplater(zip, {
@@ -174,19 +181,19 @@
           }
           return reject(error);
         }
-  
+    
         // Ensure data is not undefined or null
         if (!data || typeof data !== 'object') {
           console.error("Data for template is invalid:", data);
           return reject(new Error("Data for template is invalid."));
         }
-  
+    
         // Sanitize data to avoid undefined or null values
         const sanitizedData = {
           AccountDescription: data.AccountDescription || '',
           Antrag: data.Antrag || ''
         };
-  
+    
         // Set the template variables
         try {
           console.log("Data passed to docxtemplater:", sanitizedData);
@@ -195,7 +202,7 @@
           console.error("Error setting data for docxtemplater:", error);
           return reject(error);
         }
-  
+    
         // Render the document
         try {
           doc.render();
@@ -207,17 +214,18 @@
           }
           return reject(error);
         }
-  
+    
         // Generate the final output
         const out = doc.getZip().generate({
           type: 'blob',
           mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         });
-  
+    
         resolve(out);
       };
       reader.readAsArrayBuffer(templateBlob);
     });
   }
+  
 
 })();
