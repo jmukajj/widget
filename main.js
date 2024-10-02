@@ -169,10 +169,10 @@
         }
   
         // Sanitize data to avoid undefined or null values
-        const sanitizedData = {};
-        Object.keys(data).forEach(key => {
-          sanitizedData[key] = data[key] !== undefined && data[key] !== null ? data[key] : '';
-        });
+        const sanitizedData = {
+          AccountDescription: data.AccountDescription || '',
+          Antrag: data.Antrag || ''
+        };
   
         // Set the template variables
         try {
