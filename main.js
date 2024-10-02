@@ -156,7 +156,7 @@
           });
         } catch (error) {
           console.error("Error initializing docxtemplater:", error);
-          if(error.properties && error.properties.errors){
+          if (error.properties && error.properties.errors) {
             console.error("Detailed errors:", error.properties.errors);
           }
           return reject(error);
