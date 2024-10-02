@@ -133,12 +133,25 @@
       if (!response.ok) {
         throw new Error(`Failed to fetch the Word template: ${response.statusText}`);
       }
-      return await response.blob();
+  
+      // Create a Blob from the response
+      const blob = await response.blob();
+      
+      // Test by creating a link and downloading to ensure correctness
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = "fetched_template.docx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      return blob;
     } catch (error) {
       console.error('Error fetching template:', error);
       throw error;
     }
   }
+  
 
   // Populate the Word Template
   function populateWordTemplate(templateBlob, data) {
