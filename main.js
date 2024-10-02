@@ -60,13 +60,17 @@
         this.generateAndDownloadDocument();
       });
 
-      // Load docx library
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/7.0.1/docx.min.js')
+      // Load necessary libraries
+      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js')
         .then(() => {
-          console.log("docx library loaded successfully!");
+          console.log("mammoth.js library loaded successfully!");
+          return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.2/docxtemplater.min.js');
+        })
+        .then(() => {
+          console.log("docxtemplater library loaded successfully!");
         })
         .catch((error) => {
-          console.error("Error loading the library:", error);
+          console.error("Error loading a library:", error);
         });
     }
 
@@ -100,43 +104,61 @@
       }
 
       try {
-        // Load the existing document from a URL or file
+        // Fetch the Word document template
         const response = await fetch('https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx');
         if (!response.ok) {
           throw new Error(`Failed to fetch the Word template: ${response.statusText}`);
         }
         const arrayBuffer = await response.arrayBuffer();
 
-        const zip = new JSZip();
-        const content = await zip.loadAsync(arrayBuffer);
-        const doc = new docx.Document(content);
+        // Convert DOCX to HTML using Mammoth.js
+        mammoth.convertToHtml({ arrayBuffer: arrayBuffer })
+          .then(result => {
+            let html = result.value; // HTML representation of the document
 
-        // Replace placeholders in the document with the given data
-        doc.getParagraphs().forEach((paragraph) => {
-          paragraph.getRuns().forEach((run) => {
-            let text = run.text;
+            // Replace placeholders in the HTML content
             Object.keys(data).forEach((key) => {
               const placeholder = `{{${key}}}`;
-              if (text.includes(placeholder)) {
-                text = text.replace(placeholder, data[key]);
-              }
+              html = html.replace(new RegExp(placeholder, 'g'), data[key]);
             });
-            run.text = text;
-          });
-        });
 
-        // Generate the new document and download it
-        const buffer = await docx.Packer.toBuffer(doc);
-        const blob = new Blob([buffer], {
-          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        });
+            // Convert the updated HTML back into a Word document
+            this.createWordDocumentFromHtml(html);
+          })
+          .catch(err => console.error('Error converting document:', err));
 
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.download = 'populated_document.docx';
-        link.click();
       } catch (error) {
         console.error("Error generating document:", error);
+      }
+    }
+
+    createWordDocumentFromHtml(htmlContent) {
+      try {
+        // Create a new docxtemplater document with the updated HTML content
+        const zip = new PizZip();
+        const doc = new window.docxtemplater(zip);
+
+        // Set the data for the document (HTML converted)
+        doc.loadZip(zip);
+
+        // Inject the updated content into the document
+        doc.setData({
+          content: htmlContent
+        });
+
+        // Render the document
+        doc.render();
+
+        // Generate a new Word document and download it
+        const out = doc.getZip().generate({
+          type: 'blob',
+          mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        });
+
+        saveAs(out, 'populated_document.docx');
+
+      } catch (error) {
+        console.error("Error creating Word document from HTML:", error);
       }
     }
   }
