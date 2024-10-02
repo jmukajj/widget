@@ -65,7 +65,7 @@
       this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js')
         .then(() => {
           console.log("FileSaver.js library loaded successfully!");
-          return this.loadScript('https://unpkg.com/pizzip@3.1.7/dist/pizzip-utils-ie.js');
+          return this.loadScript('https://unpkg.com/pizzip@3.1.1/dist/pizzip-utils-ie.js');
         })
         .then(() => {
           console.log("PizZip library loaded successfully!");
@@ -163,6 +163,7 @@
         let zip;
         try {
           zip = new PizZip(arrayBuffer);
+          console.log("Files in ZIP:", zip.files);
         } catch (error) {
           console.error("Error reading the array buffer with PizZip:", error);
           return reject(error);
