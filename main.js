@@ -64,7 +64,7 @@
       this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js')
         .then(() => {
           console.log("mammoth.js library loaded successfully!");
-          return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.1/pizzip.min.js');
+          return this.loadScript('https://cdn.jsdelivr.net/npm/pizzip@3.1.1/dist/pizzip.min.js');
         })
         .then(() => {
           console.log("PizZip library loaded successfully!");
