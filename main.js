@@ -1,58 +1,90 @@
-(function () {
-  const template = document.createElement('template');
-  template.innerHTML = `
-       <style>
-        #root {
-            width: 300px;
-            justify-content: flex-start;
-            align-items: flex-start;
-            height: 100vh;
-        }
-        .link-container {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: left;
-            left: 7px;
-            align-items: left;
-            padding: 20px;
-            border: 0.5px solid black;
-            background-color: #FCFCFC;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, .3);
-        }
-        .link-container::before {
-            content: '';
-            position: absolute;
-            left: -5.5px;
-            top: 50%;
-            transform: translateY(-50%) rotate(135deg);
-            border: solid black;
-            border-width: 0 0.5px 0.5px 0;
-            display: inline-block;
-            padding: 5px;
-            background-color: #FCFCFC;
-        }
-        .link {
-            text-decoration: none;
-            color: #5E97C4;
-            font-family: Arial, sans-serif;
-            margin-bottom: 10px;
-            display: block;
-        }
-       </style>
+<script type="text/javascript">
+  async function runPythonAndModifyDocument(data, documentPath, outputPath, oldChar, newChar) {
+    // Load Pyodide
+    const pyodide = await loadPyodide();
+    
+    // Define the Python code
+    const pythonCode = `
+      from docx import Document
 
-       <div id="root">
-          <div class="link-container" id="links-container">
-            <p><a id="link_href" href="#" target="_blank">Download Word Document</a></p>
-          </div>
-       </div>
-  `;
+      def replace_checkboxes(data, document_path, output_path, old_char, new_char):
+          # Open the existing document
+          doc = Document(document_path)
+          for id in data:
+              for paragraph in doc.paragraphs:
+                  if id in paragraph.text:
+                      for index, run in enumerate(paragraph.runs):
+                          if id in run.text:
+                              paragraph.runs[index-2].text = paragraph.runs[index-2].text.replace(old_char, new_char)
+          doc.save(output_path)
+
+      # Run the function with the passed arguments
+      replace_checkboxes(${data}, "${documentPath}", "${outputPath}", "${oldChar}", "${newChar}")
+    `;
+
+    // Run the Python code
+    try {
+      await pyodide.runPython(pythonCode);
+      console.log("Python script executed successfully!");
+    } catch (error) {
+      console.error("Error executing Python script:", error);
+    }
+  }
 
   class Main extends HTMLElement {
     constructor() {
       super();
       console.log('Widget initialized');
       this._shadowRoot = this.attachShadow({ mode: 'open' });
+      const template = document.createElement('template');
+      template.innerHTML = `
+        <style>
+          #root {
+              width: 300px;
+              justify-content: flex-start;
+              align-items: flex-start;
+              height: 100vh;
+          }
+          .link-container {
+              position: relative;
+              display: flex;
+              flex-direction: column;
+              justify-content: left;
+              left: 7px;
+              align-items: left;
+              padding: 20px;
+              border: 0.5px solid black;
+              background-color: #FCFCFC;
+              box-shadow: 0 4px 8px rgba(0, 0, 0, .3);
+          }
+          .link-container::before {
+              content: '';
+              position: absolute;
+              left: -5.5px;
+              top: 50%;
+              transform: translateY(-50%) rotate(135deg);
+              border: solid black;
+              border-width: 0 0.5px 0.5px 0;
+              display: inline-block;
+              padding: 5px;
+              background-color: #FCFCFC;
+          }
+          .link {
+              text-decoration: none;
+              color: #5E97C4;
+              font-family: Arial, sans-serif;
+              margin-bottom: 10px;
+              display: block;
+          }
+        </style>
+
+        <div id="root">
+          <div class="link-container" id="links-container">
+            <p><a id="link_href" href="#" target="_blank">Download Word Document</a></p>
+          </div>
+        </div>
+      `;
+
       this._shadowRoot.appendChild(template.content.cloneNode(true));
       this._postData = {};
 
@@ -60,13 +92,13 @@
         this.generateAndDownloadDocument();
       });
 
-      // Load docx library
-      this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docx/7.0.1/docx.min.js')
+      // Load docx library and Pyodide
+      this.loadScript('https://cdn.jsdelivr.net/pyodide/v0.18.1/full/pyodide.js')
         .then(() => {
-          console.log("docx library loaded successfully!");
+          console.log("Pyodide library loaded successfully!");
         })
         .catch((error) => {
-          console.error("Error loading the library:", error);
+          console.error("Error loading the Pyodide library:", error);
         });
     }
 
@@ -99,48 +131,17 @@
         return;
       }
 
-      try {
-        // Load the existing document from a URL or file
-        const response = await fetch('https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx');
-        if (!response.ok) {
-          throw new Error(`Failed to fetch the Word template: ${response.statusText}`);
-        }
-        const arrayBuffer = await response.arrayBuffer();
+      // Define the required parameters for the Python script
+      const documentPath = "https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx'"; // Adjust the path as needed
+      const outputPath = "https://github.com/jmukajj/widget/raw/refs/heads/main/template.docx'";
+      const oldChar = "\\uf06f";
+      const newChar = "\\uf0fd";
+      const dataToReplace = Object.values(data); // Assuming this._postData contains values like ["{{ID:1}}", "{{ID:2}}"]
 
-        const zip = new JSZip();
-        const content = await zip.loadAsync(arrayBuffer);
-        const doc = new docx.Document(content);
-
-        // Replace placeholders in the document with the given data
-        doc.getParagraphs().forEach((paragraph) => {
-          paragraph.getRuns().forEach((run) => {
-            let text = run.text;
-            Object.keys(data).forEach((key) => {
-              const placeholder = `{{${key}}}`;
-              if (text.includes(placeholder)) {
-                text = text.replace(placeholder, data[key]);
-              }
-            });
-            run.text = text;
-          });
-        });
-
-        // Generate the new document and download it
-        const buffer = await docx.Packer.toBuffer(doc);
-        const blob = new Blob([buffer], {
-          type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        });
-
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.download = 'populated_document.docx';
-        link.click();
-      } catch (error) {
-        console.error("Error generating document:", error);
-      }
+      // Run Python script to modify the Word document using Pyodide
+      await runPythonAndModifyDocument(dataToReplace, documentPath, outputPath, oldChar, newChar);
     }
   }
 
   customElements.define('com-sap-sac-jm', Main);
-
-})();
+</script>
