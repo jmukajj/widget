@@ -43,6 +43,9 @@ class Main extends HTMLElement {
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this._postData = [];
 
+        // Set the correct template URL from GitHub
+        this.templateURL = "https://raw.githubusercontent.com/your-username/your-repo-name/main/template.docx"; // Replace with your actual GitHub URL
+        
         this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
             this.updateExistingDocument();
         });
@@ -90,7 +93,7 @@ class Main extends HTMLElement {
             return;
         }
 
-        this.fetchTemplateFromURL("template.docx")
+        this.fetchTemplateFromURL(this.templateURL)
             .then(templateBlob => this.populateWordTemplate(templateBlob, data))
             .then(updatedBlob => {
                 console.log("Document updated, initiating download");
@@ -138,10 +141,8 @@ class Main extends HTMLElement {
                         const checkboxTrue = '☑';  // Checked checkbox symbol (Unicode U+2611)
                         const checkboxFalse = '☐'; // Unchecked checkbox symbol (Unicode U+2610)
 
-                        // Apply specific checkbox logic based on conditions
                         let ID_4, ID_5, ID_6, ID_7, ID_8, ID_9, ID_10;
 
-                        // Define conditions for `besch_bereich`
                         if (row.Besch_Berich_ID === "ID4") {
                             ID_4 = checkboxTrue;
                         } else if (row.Besch_Berich_ID === "ID5") {
@@ -150,7 +151,6 @@ class Main extends HTMLElement {
                             ID_6 = checkboxTrue;
                         }
 
-                        // Define conditions for account value (array values)
                         if (row.AccountID === "ID7") {
                             ID_7 = checkboxTrue;
                         } else if (row.AccountID === "ID8") {
@@ -165,13 +165,13 @@ class Main extends HTMLElement {
                             AccountDescription: row.Antrag || '',
                             AntragStatus: row.AntragStatus || '',
                             AntragDescription: row.AntragDescription || '',
-                            ID_4: ID_4 || checkboxFalse,  // Checkbox state for ID_4
-                            ID_5: ID_5 || checkboxFalse,  // Checkbox state for ID_5
-                            ID_6: ID_6 || checkboxFalse,  // Checkbox state for ID_6
-                            ID_7: ID_7 || checkboxFalse,  // Checkbox state for ID_7
-                            ID_8: ID_8 || checkboxFalse,  // Checkbox state for ID_8
-                            ID_9: ID_9 || checkboxFalse,  // Checkbox state for ID_9
-                            ID_10: ID_10 || checkboxFalse  // Checkbox state for ID_10
+                            ID_4: ID_4 || checkboxFalse,
+                            ID_5: ID_5 || checkboxFalse,
+                            ID_6: ID_6 || checkboxFalse,
+                            ID_7: ID_7 || checkboxFalse,
+                            ID_8: ID_8 || checkboxFalse,
+                            ID_9: ID_9 || checkboxFalse,
+                            ID_10: ID_10 || checkboxFalse
                         };
                     })
                 };
