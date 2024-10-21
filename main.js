@@ -120,65 +120,99 @@ class Main extends HTMLElement {
     }
 
     populateWordTemplate(templateBlob, data) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                const arrayBuffer = event.target.result;
+					return new Promise((resolve, reject) => {
+						const reader = new FileReader();
+						reader.onload = event => {
+							const arrayBuffer = event.target.result;
+							let zip;
 
-                let zip;
-                try {
-                    zip = new PizZip(arrayBuffer);
-                } catch (error) {
-                    console.error("Error reading the array buffer with PizZip:", error);
-                    return reject(error);
-                }
+							try {
+								zip = new PizZip(arrayBuffer);
+							} catch (error) {
+								return reject(error);
+							}
 
-                let doc;
-                try {
-                    doc = new window.docxtemplater(zip, {
-                        paragraphLoop: true,
-                        linebreaks: true,
-                    });
-                } catch (error) {
-                    console.error("Error initializing docxtemplater:", error);
-                    return reject(error);
-                }
+							let doc;
+							try {
+								doc = new window.docxtemplater(zip, {
+									paragraphLoop: true,
+									linebreaks: true,
+								});
+							} catch (error) {
+								return reject(error);
+							}
 
-                // Ensure data is not undefined or null
-                const sanitizedData = {
-                    rows: data.map((row, index) => ({
-                        AccountDescription: row.AccountDescription || '',
-                        Antrag: row.Antrag || '',
-                        Index: index + 1
-                    }))
-                };
+							const sanitizedData = {
+								rows: data.map((row, index) => {
+									const checkboxTrue = '☑';  // Checked checkbox symbol (Unicode U+2611)
+									const checkboxFalse = '☐'; // Unchecked checkbox symbol (Unicode U+2610)
 
-                try {
-                    console.log("Data passed to docxtemplater:", sanitizedData);
-                    doc.setData(sanitizedData);
-                } catch (error) {
-                    console.error("Error setting data for docxtemplater:", error);
-                    return reject(error);
-                }
+									// Apply specific checkbox logic for each selected row based on AccountDescription
+									let ID_1, ID_2, ID_3, ID_4, ID_5, ID_6, ID_7, ID_8;
 
-                try {
-                    doc.render();
-                    console.log("Document has been successfully populated in memory!");
-                } catch (error) {
-                    console.error("Error rendering document:", error);
-                    return reject(error);
-                }
+									// Define different checkbox patterns based on the row's data
+									if (row.AccountDescription === "Account A") {
+										ID_1 = checkboxTrue;
+										ID_2 = checkboxTrue;
+										ID_3 = checkboxFalse;
+										ID_4 = checkboxTrue;
+										ID_5 = checkboxFalse;
+										ID_6 = checkboxFalse;
+										ID_7 = checkboxTrue;
+										ID_8 = checkboxFalse;
+									} else if (row.AccountDescription === "Account B") {
+										ID_1 = checkboxFalse;
+										ID_2 = checkboxTrue;
+										ID_3 = checkboxTrue;
+										ID_4 = checkboxFalse;
+										ID_5 = checkboxTrue;
+										ID_6 = checkboxTrue;
+										ID_7 = checkboxFalse;
+										ID_8 = checkboxTrue;
+									} else if (row.AccountDescription === "Account C") {
+										ID_1 = checkboxTrue;
+										ID_2 = checkboxFalse;
+										ID_3 = checkboxTrue;
+										ID_4 = checkboxTrue;
+										ID_5 = checkboxFalse;
+										ID_6 = checkboxTrue;
+										ID_7 = checkboxFalse;
+										ID_8 = checkboxTrue;
+									}
 
-                const updatedBlob = doc.getZip().generate({
-                    type: 'blob',
-                    mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                });
+									return {
+										AccountDescription: row.AccountDescription || '',
+										Antrag: row.Antrag || '',
+										ID_1: ID_1,  // Checkbox states for each field
+										ID_2: ID_2,
+										ID_3: ID_3,
+										ID_4: ID_4,
+										ID_5: ID_5,
+										ID_6: ID_6,
+										ID_7: ID_7,
+										ID_8: ID_8
+									};
+								})
+							};
 
-                resolve(updatedBlob);
-            };
-            reader.readAsArrayBuffer(templateBlob);
-        });
-    }
+							try {
+								doc.setData(sanitizedData);
+								doc.render();
+							} catch (error) {
+								return reject(error);
+							}
+
+							const updatedBlob = doc.getZip().generate({
+								type: 'blob',
+								mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+							});
+
+							resolve(updatedBlob);
+						};
+
+						reader.readAsArrayBuffer(templateBlob);
+					});
+				}
 }
 
 customElements.define('com-sap-sac-jm', Main);
