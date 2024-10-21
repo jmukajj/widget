@@ -47,22 +47,18 @@ class Main extends HTMLElement {
             this.updateExistingDocument();
         });
 
-        // Load the libraries in the correct order
+        // Load external libraries in sequence
         this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js')
             .then(() => {
-                console.log("FileSaver.js library loaded successfully!");
+                console.log("FileSaver.js loaded");
                 return this.loadScript('https://cdn.jsdelivr.net/npm/pizzip@3.1.1/dist/pizzip.min.js');
             })
             .then(() => {
-                console.log("PizZip library loaded successfully!");
+                console.log("PizZip loaded");
                 return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.2/docxtemplater.min.js');
             })
-            .then(() => {
-                console.log("docxtemplater library loaded successfully!");
-            })
-            .catch((error) => {
-                console.error("Error loading a library:", error);
-            });
+            .then(() => console.log("docxtemplater loaded"))
+            .catch(error => console.error("Error loading a library:", error));
     }
 
     loadScript(url) {
@@ -77,46 +73,41 @@ class Main extends HTMLElement {
     }
 
     sendPostData(selectedRowsData) {
-        console.log("Received selected rows data: ", selectedRowsData);
+        console.log("Received data in widget:", selectedRowsData);
         if (!selectedRowsData || selectedRowsData.length === 0) {
-            console.error("No data provided in selected rows", selectedRowsData);
             alert("No data to update the document");
             return;
         }
         this._postData = selectedRowsData;
-        console.log("Post Data after population: ", this._postData);
+        console.log("Post data set in widget:", this._postData);
     }
 
     updateExistingDocument() {
         const data = this._postData;
+        console.log("Updating document with data:", data);
         if (!data || data.length === 0) {
             alert("No data to update the document");
             return;
         }
 
-        // Fetch the Word template, populate it, and allow the user to download the updated document
-        this.fetchTemplateFromURL(this.templateURL)
+        this.fetchTemplateFromURL("template.docx")
             .then(templateBlob => this.populateWordTemplate(templateBlob, data))
-            .then((updatedBlob) => {
-                // Trigger the download of the updated document
+            .then(updatedBlob => {
+                console.log("Document updated, initiating download");
                 saveAs(updatedBlob, 'updated_document.docx');
-                alert("Document has been successfully updated and downloaded!");
-                console.log("Document has been successfully updated and downloaded.");
             })
-            .catch(error => {
-                console.error("Error updating document:", error);
-                alert("Error updating the document. Please check the console for details.");
-            });
+            .catch(error => console.error("Error updating document:", error));
     }
 
     fetchTemplateFromURL(url) {
-        return fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                return response.blob();
-            });
+        console.log("Fetching template from URL:", url);
+        return fetch(url).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            console.log("Template fetched successfully");
+            return response.blob();
+        });
     }
 
     populateWordTemplate(templateBlob, data) {
@@ -142,23 +133,45 @@ class Main extends HTMLElement {
                     return reject(error);
                 }
 
-                // Map data to Word template
                 const sanitizedData = {
-                    rows: data.map((row, index) => {
-                        // Extract checkbox values from the row data (assuming they come as an array)
-                        const [ID_1, ID_2, ID_3, ID_4, ID_5, ID_6, ID_7, ID_8] = row.checkboxValues || [];
+                    rows: data.map(row => {
+                        const checkboxTrue = '☑';  // Checked checkbox symbol (Unicode U+2611)
+                        const checkboxFalse = '☐'; // Unchecked checkbox symbol (Unicode U+2610)
+
+                        // Apply specific checkbox logic based on conditions
+                        let ID_4, ID_5, ID_6, ID_7, ID_8, ID_9, ID_10;
+
+                        // Define conditions for `besch_bereich`
+                        if (row.Besch_Berich_ID === "ID4") {
+                            ID_4 = checkboxTrue;
+                        } else if (row.Besch_Berich_ID === "ID5") {
+                            ID_5 = checkboxTrue;
+                        } else if (row.Besch_Berich_ID === "ID6") {
+                            ID_6 = checkboxTrue;
+                        }
+
+                        // Define conditions for account value (array values)
+                        if (row.AccountID === "ID7") {
+                            ID_7 = checkboxTrue;
+                        } else if (row.AccountID === "ID8") {
+                            ID_8 = checkboxTrue;
+                        } else if (row.AccountID === "ID9") {
+                            ID_9 = checkboxTrue;
+                        } else if (row.AccountID === "ID10") {
+                            ID_10 = checkboxTrue;
+                        }
 
                         return {
-                            AccountDescription: row.AccountDescription || '',
-                            Antrag: row.Antrag || '',
-                            ID_1: ID_1 || '☐',  // Default to unchecked if not provided
-                            ID_2: ID_2 || '☐',
-                            ID_3: ID_3 || '☐',
-                            ID_4: ID_4 || '☐',
-                            ID_5: ID_5 || '☐',
-                            ID_6: ID_6 || '☐',
-                            ID_7: ID_7 || '☐',
-                            ID_8: ID_8 || '☐'
+                            AccountDescription: row.Antrag || '',
+                            AntragStatus: row.AntragStatus || '',
+                            AntragDescription: row.AntragDescription || '',
+                            ID_4: ID_4 || checkboxFalse,  // Checkbox state for ID_4
+                            ID_5: ID_5 || checkboxFalse,  // Checkbox state for ID_5
+                            ID_6: ID_6 || checkboxFalse,  // Checkbox state for ID_6
+                            ID_7: ID_7 || checkboxFalse,  // Checkbox state for ID_7
+                            ID_8: ID_8 || checkboxFalse,  // Checkbox state for ID_8
+                            ID_9: ID_9 || checkboxFalse,  // Checkbox state for ID_9
+                            ID_10: ID_10 || checkboxFalse  // Checkbox state for ID_10
                         };
                     })
                 };
