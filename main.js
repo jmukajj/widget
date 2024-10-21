@@ -44,7 +44,7 @@ class Main extends HTMLElement {
         this._postData = [];
 
         // Set the correct template URL from GitHub
-        this.templateURL = "https://raw.githubusercontent.com/your-username/your-repo-name/main/template.docx"; // Replace with your actual GitHub URL
+        this.templateURL = "https://jmukajj.github.io/widget/template.docx"; //  GitHub URL
         
         this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
             this.updateExistingDocument();
