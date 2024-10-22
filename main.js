@@ -156,6 +156,7 @@ class Main extends HTMLElement {
                     ID_9: (data.AccountID === "ID_9") ? '☑' : '☐',
                     ID_10: (data.AccountID === "ID_10") ? '☑' : '☐'
                 };
+                console.log("Sanitized Data to be inserted into the template:", sanitizedData);
 
                 try {
                     doc.setData(sanitizedData);
