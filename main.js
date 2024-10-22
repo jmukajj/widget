@@ -46,8 +46,8 @@ class Main extends HTMLElement {
         // Set the correct template URL from GitHub
         this.templateURL = "https://jmukajj.github.io/widget/template.docx"; //  GitHub URL
         
-        this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
-            event.preventDefault();
+        this._shadowRoot.getElementById('link_href').addEventListener('click', (event) => {
+            event.preventDefault();  // Prevent default link behavior
             console.log("Download link clicked, attempting to update the document...");
             this.updateExistingDocument();
         });
@@ -58,7 +58,6 @@ class Main extends HTMLElement {
                 console.log("FileSaver.js loaded");
                 return this.loadScript('https://cdn.jsdelivr.net/npm/pizzip@3.1.1/dist/pizzip.min.js');
             })
-            .catch(error => console.error("Error loading a library:", error));
             .then(() => {
                 console.log("PizZip loaded");
                 return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.2/docxtemplater.min.js');
@@ -102,26 +101,22 @@ class Main extends HTMLElement {
                 console.log("Document updated, initiating download");
                 saveAs(updatedBlob, 'updated_document.docx');
             })
-            .catch(error => console.error("Error updating document:", error));
-            alert("An error occurred while updating the document. Check the console for details.");
+            .catch(error => {
+                console.error("Error updating document:", error);
+                alert("An error occurred while updating the document. Check the console for details.");
             });
-        } catch (error) {
-            console.error("Unexpected error in updateExistingDocument:", error);
-            alert("Unexpected error. Check the console for more details.");
-        }
     }
 
-    this.fetchTemplateFromURL(this.templateURL)
-        .then(templateBlob => {
-            if (!templateBlob) {
-                throw new Error("Failed to fetch the template. Please check the template URL.");
+    fetchTemplateFromURL(url) {
+        console.log("Fetching template from URL:", url);
+        return fetch(url).then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
             }
-            return this.populateWordTemplate(templateBlob, data);
-        })
-        .catch(error => {
-            console.error("Error fetching or processing the template:", error);
-            alert("There was an issue fetching or processing the template.");
+            console.log("Template fetched successfully");
+            return response.blob();
         });
+    }
 
     populateWordTemplate(templateBlob, data) {
         return new Promise((resolve, reject) => {
