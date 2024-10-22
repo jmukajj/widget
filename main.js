@@ -94,12 +94,21 @@ class Main extends HTMLElement {
         }
 
         this.fetchTemplateFromURL(this.templateURL)
-            .then(templateBlob => this.populateWordTemplate(templateBlob, data))
-            .then(updatedBlob => {
-                console.log("Document updated, initiating download");
-                saveAs(updatedBlob, 'updated_document.docx');
+            .then(templateBlob => {
+                console.log("Template fetched successfully");
+                return this.populateWordTemplate(templateBlob, data);
             })
-            .catch(error => console.error("Error updating document:", error));
+            .then(updatedBlob => {
+                if (updatedBlob) {
+                    console.log("Document updated, initiating download");
+                    saveAs(updatedBlob, 'updated_document.docx');
+                } else {
+                    console.error("No updated blob available for download");
+                }
+            })
+            .catch(error => {
+                console.error("Error updating document:", error);
+            });
     }
 
     fetchTemplateFromURL(url) {
