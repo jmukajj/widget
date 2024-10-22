@@ -47,6 +47,7 @@ class Main extends HTMLElement {
         this.templateURL = "https://jmukajj.github.io/widget/template.docx"; //  GitHub URL
         
         this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
+            event.preventDefault();
             this.updateExistingDocument();
         });
 
