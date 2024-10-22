@@ -42,19 +42,12 @@ class Main extends HTMLElement {
         
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this._postData = [];
-        // Add this test Blob download
-        const testBlob = new Blob(["This is a test document"], { type: 'text/plain' });
-        saveAs(testBlob, 'test_document.txt');
 
         // Set the correct template URL from GitHub
         this.templateURL = "https://jmukajj.github.io/widget/template.docx"; //  GitHub URL
         
-        this._shadowRoot.getElementById('link_href').addEventListener('click', (event) => {
-            event.preventDefault(); // Prevent the default anchor link behavior
-        
-            // Test the file download on click
-            const testBlob = new Blob(["This is a test document"], { type: 'text/plain' });
-            saveAs(testBlob, "https://jmukajj.github.io/widget");
+        this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
+            this.updateExistingDocument();
         });
 
         // Load external libraries in sequence
@@ -101,21 +94,12 @@ class Main extends HTMLElement {
         }
 
         this.fetchTemplateFromURL(this.templateURL)
-            .then(templateBlob => {
-                console.log("Template fetched successfully");
-                return this.populateWordTemplate(templateBlob, data);
-            })
+            .then(templateBlob => this.populateWordTemplate(templateBlob, data))
             .then(updatedBlob => {
-                if (updatedBlob) {
-                    console.log("Document updated, initiating download");
-                    saveAs(updatedBlob, 'updated_document.docx');
-                } else {
-                    console.error("No updated blob available for download");
-                }
+                console.log("Document updated, initiating download");
+                saveAs(updatedBlob, 'updated_document.docx');
             })
-            .catch(error => {
-                console.error("Error updating document:", error);
-            });
+            .catch(error => console.error("Error updating document:", error));
     }
 
     fetchTemplateFromURL(url) {
