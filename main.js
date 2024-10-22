@@ -54,7 +54,7 @@ class Main extends HTMLElement {
         
             // Test the file download on click
             const testBlob = new Blob(["This is a test document"], { type: 'text/plain' });
-            saveAs(testBlob, 'test_document.txt');
+            saveAs(testBlob, "https://jmukajj.github.io/widget");
         });
 
         // Load external libraries in sequence
