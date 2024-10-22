@@ -151,10 +151,10 @@ class Main extends HTMLElement {
                     ID_4: (data.Besch_Berich_desc === "BFMB") ? '☑' : '☐',
                     ID_5: (data.Besch_Berich_desc === "IT") ? '☑' : '☐',
                     ID_6: (data.Besch_Berich_desc === "PE") ? '☑' : '☐',
-                    ID_7: (data.AccountID === "ID7") ? '☑' : '☐',
-                    ID_8: (data.AccountID === "ID8") ? '☑' : '☐',
-                    ID_9: (data.AccountID === "ID9") ? '☑' : '☐',
-                    ID_10: (data.AccountID === "ID10") ? '☑' : '☐'
+                    ID_7: (data.AccountID === "ID_7") ? '☑' : '☐',
+                    ID_8: (data.AccountID === "ID_8") ? '☑' : '☐',
+                    ID_9: (data.AccountID === "ID_9") ? '☑' : '☐',
+                    ID_10: (data.AccountID === "ID_10") ? '☑' : '☐'
                 };
 
                 try {
