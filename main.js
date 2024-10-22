@@ -111,16 +111,17 @@ class Main extends HTMLElement {
         }
     }
 
-    fetchTemplateFromURL(url) {
-        console.log("Fetching template from URL:", url);
-        return fetch(url).then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
+    this.fetchTemplateFromURL(this.templateURL)
+        .then(templateBlob => {
+            if (!templateBlob) {
+                throw new Error("Failed to fetch the template. Please check the template URL.");
             }
-            console.log("Template fetched successfully");
-            return response.blob();
+            return this.populateWordTemplate(templateBlob, data);
+        })
+        .catch(error => {
+            console.error("Error fetching or processing the template:", error);
+            alert("There was an issue fetching or processing the template.");
         });
-    }
 
     populateWordTemplate(templateBlob, data) {
         return new Promise((resolve, reject) => {
