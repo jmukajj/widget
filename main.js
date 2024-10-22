@@ -41,7 +41,7 @@ class Main extends HTMLElement {
         `;
         
         this._shadowRoot.appendChild(template.content.cloneNode(true));
-        this._postData = [];
+        this._postData = null; // Now expect a single object instead of an array
 
         // Set the correct template URL from GitHub
         this.templateURL = "https://jmukajj.github.io/widget/template.docx"; //  GitHub URL
@@ -77,20 +77,22 @@ class Main extends HTMLElement {
         });
     }
 
-    sendPostData(selectedRowsData) {
-        console.log("Received data in widget:", selectedRowsData);
-        if (!selectedRowsData || selectedRowsData.length === 0) {
+    // Updated to receive a single object instead of an array
+    sendPostData(selectedRowData) {
+        console.log("Received data in widget:", selectedRowData);
+        if (!selectedRowData || Object.keys(selectedRowData).length === 0) {
             alert("No data to update the document");
             return;
         }
-        this._postData = selectedRowsData;
+        this._postData = selectedRowData; // Store the single object in _postData
         console.log("Post data set in widget:", this._postData);
     }
 
+    // Now process the single object
     updateExistingDocument() {
-        const data = this._postData;
+        const data = this._postData; // This is the object you passed via sendPostData
         console.log("Updating document with data:", data);
-        if (!data || data.length === 0) {
+        if (!data || Object.keys(data).length === 0) {
             alert("No data to update the document");
             return;
         }
@@ -141,44 +143,18 @@ class Main extends HTMLElement {
                     return reject(error);
                 }
 
+                // Map the single object data to the Word template placeholders
                 const sanitizedData = {
-                    rows: data.map(row => {
-                        const checkboxTrue = '☑';  // Checked checkbox symbol (Unicode U+2611)
-                        const checkboxFalse = '☐'; // Unchecked checkbox symbol (Unicode U+2610)
-
-                        let ID_4, ID_5, ID_6, ID_7, ID_8, ID_9, ID_10;
-
-                        if (row.Besch_Berich_ID === "ID4") {
-                            ID_4 = checkboxTrue;
-                        } else if (row.Besch_Berich_ID === "ID5") {
-                            ID_5 = checkboxTrue;
-                        } else if (row.Besch_Berich_ID === "ID6") {
-                            ID_6 = checkboxTrue;
-                        }
-
-                        if (row.AccountID === "ID7") {
-                            ID_7 = checkboxTrue;
-                        } else if (row.AccountID === "ID8") {
-                            ID_8 = checkboxTrue;
-                        } else if (row.AccountID === "ID9") {
-                            ID_9 = checkboxTrue;
-                        } else if (row.AccountID === "ID10") {
-                            ID_10 = checkboxTrue;
-                        }
-
-                        return {
-                            AccountDescription: row.Antrag || '',
-                            AntragStatus: row.AntragStatus || '',
-                            AntragDescription: row.AntragDescription || '',
-                            ID_4: ID_4 || checkboxFalse,
-                            ID_5: ID_5 || checkboxFalse,
-                            ID_6: ID_6 || checkboxFalse,
-                            ID_7: ID_7 || checkboxFalse,
-                            ID_8: ID_8 || checkboxFalse,
-                            ID_9: ID_9 || checkboxFalse,
-                            ID_10: ID_10 || checkboxFalse
-                        };
-                    })
+                    AccountDescription: data.Antrag || '',
+                    AntragStatus: data.AntragStatus || '',
+                    AntragDescription: data.AntragDescription || '',
+                    ID_4: (data.Besch_Berich_desc === "BFMB") ? '☑' : '☐',
+                    ID_5: (data.Besch_Berich_desc === "IT") ? '☑' : '☐',
+                    ID_6: (data.Besch_Berich_desc === "PE") ? '☑' : '☐',
+                    ID_7: (data.AccountID === "ID7") ? '☑' : '☐',
+                    ID_8: (data.AccountID === "ID8") ? '☑' : '☐',
+                    ID_9: (data.AccountID === "ID9") ? '☑' : '☐',
+                    ID_10: (data.AccountID === "ID10") ? '☑' : '☐'
                 };
 
                 try {
