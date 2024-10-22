@@ -48,6 +48,7 @@ class Main extends HTMLElement {
         
         this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
             event.preventDefault();
+            console.log("Download link clicked, attempting to update the document...");
             this.updateExistingDocument();
         });
 
@@ -57,6 +58,7 @@ class Main extends HTMLElement {
                 console.log("FileSaver.js loaded");
                 return this.loadScript('https://cdn.jsdelivr.net/npm/pizzip@3.1.1/dist/pizzip.min.js');
             })
+            .catch(error => console.error("Error loading a library:", error));
             .then(() => {
                 console.log("PizZip loaded");
                 return this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.21.2/docxtemplater.min.js');
@@ -101,6 +103,12 @@ class Main extends HTMLElement {
                 saveAs(updatedBlob, 'updated_document.docx');
             })
             .catch(error => console.error("Error updating document:", error));
+            alert("An error occurred while updating the document. Check the console for details.");
+            });
+        } catch (error) {
+            console.error("Unexpected error in updateExistingDocument:", error);
+            alert("Unexpected error. Check the console for more details.");
+        }
     }
 
     fetchTemplateFromURL(url) {
