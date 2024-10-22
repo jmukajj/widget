@@ -51,7 +51,10 @@ class Main extends HTMLElement {
         
         this._shadowRoot.getElementById('link_href').addEventListener('click', (event) => {
             event.preventDefault(); // Prevent the default anchor link behavior
-            this.updateExistingDocument();
+        
+            // Test the file download on click
+            const testBlob = new Blob(["This is a test document"], { type: 'text/plain' });
+            saveAs(testBlob, 'test_document.txt');
         });
 
         // Load external libraries in sequence
