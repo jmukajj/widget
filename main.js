@@ -42,11 +42,15 @@ class Main extends HTMLElement {
         
         this._shadowRoot.appendChild(template.content.cloneNode(true));
         this._postData = [];
+        // Add this test Blob download
+        const testBlob = new Blob(["This is a test document"], { type: 'text/plain' });
+        saveAs(testBlob, 'test_document.txt');
 
         // Set the correct template URL from GitHub
         this.templateURL = "https://jmukajj.github.io/widget/template.docx"; //  GitHub URL
         
-        this._shadowRoot.getElementById('link_href').addEventListener('click', () => {
+        this._shadowRoot.getElementById('link_href').addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent the default anchor link behavior
             this.updateExistingDocument();
         });
 
