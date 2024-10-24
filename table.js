@@ -17,23 +17,36 @@ if (selektion && selektion.length > 0) {
         var antragDesc = selektion[0]["P2R_G_ANTRAG.Antragsbeschreibung"]; // Extract the description value
         console.log(antragDesc);	
 		
-		// besch_bereich logic to retrieve ID based on value
-		var besch_bereich = selektion[0]["P2R_G_ANTRAG.Beschaffender_Bereich"]; // Extract the besch_bereich value
-        if (besch_bereich === "BFMB") {
-            besch_bereich_id = "ID4";
-        } else if (besch_bereich === "IT") {
-            besch_bereich_id = "ID5";
-        } else if (besch_bereich === "Marketing") {
-            besch_bereich_id = "ID6";
-        } else {
-            besch_bereich_id = "Unknown ID";
-        }
-        console.log(besch_bereich_id);
+		// besch_bereich logic to retrieve the description based on value
+		var besch_bereich_id = selektion[0]["P2R_G_BESCHAFFENDER_BEREICH"]; // Extract the Beschaffender_Bereich ID
+		console.log(besch_bereich_id);
+
+		if (besch_bereich_id) {
+			var besch_bereich_description = Table_1.getDataSource().getMember("P2R_G_BESCHAFFENDER_BEREICH", besch_bereich_id).description; // Fetch the description
+			console.log(besch_bereich_description);
+
+			// Apply your logic based on the description
+			if (besch_bereich_description === "BFMB") {
+				besch_bereich_id = "ID_4";
+			} else if (besch_bereich_description === "IT") {
+				besch_bereich_id = "ID_5";
+			} else if (besch_bereich_description === "PE") {
+				besch_bereich_id = "ID_6";
+			} else if (besch_bereich_description === "GFPPH") {
+				besch_bereich_id = "ID_13";
+			} else {
+				besch_bereich_id = "Unassigned";
+			}
+		} else {
+			besch_bereich_id = "Unassigned";
+		}
+
+		console.log(besch_bereich_id);
 		
         // Retrieve raw account values from the result set and apply condition for ID assignment
         var arr = Table_1.getDataSource().getResultSet();
         var arrvalue = ArrayUtils.create(Type.number);
-        var accountID = "Unknown ID"; // Default if no conditions match
+        var accountID = "Unassigned"; // Default if no conditions match
         
         for (var i = 0; i < arr.length; i++) {
             var rawValue = arr[i]['Account'].rawValue;
@@ -44,15 +57,15 @@ if (selektion && selektion.length > 0) {
 		
         // Determine the ID based on the account value
         if (arrvalue[0] < 54540) {
-            accountID = "ID7"; // < € 54.540,00
+            accountID = "ID_7"; // < € 54.540,00
         } else if (arrvalue[0] >= 54540.01 && arrvalue[0] <= 109080) {
-            accountID = "ID8"; // € 54.540,01 bis € 109.080,00
+            accountID = "ID_8"; // € 54.540,01 bis € 109.080,00
         } else if (arrvalue[0] >= 109080.01 && arrvalue[0] <= 214500) {
-            accountID = "ID9"; // € 109.080,01 bis € 214.500,00
+            accountID = "ID_9"; // € 109.080,01 bis € 214.500,00
         } else if (arrvalue[0] > 214500) {
-            accountID = "ID10"; // Verwaltungsrat gem. § 41 Abs. 1 Z2 BO (in sonstigen Fällen)
+            accountID = "ID_10"; // Verwaltungsrat gem. § 41 Abs. 1 Z2 BO (in sonstigen Fällen)
         } else {
-            accountID = "ID9"; // Büro gem. § 41 Abs. 1 Z1 BO in folgenden Fällen
+            accountID = "ID_7"; // Büro gem. § 41 Abs. 1 Z1 BO in folgenden Fällen
         }
 
         // Log and create the object with the relevant data
@@ -61,7 +74,7 @@ if (selektion && selektion.length > 0) {
             Antrag: req_desc, // Include the Account name
             AntragStatus: antragStatus, // Include the Antrag status
             AntragDescription: antragDesc, // Include the Antrag description
-            Besch_Berich_ID: besch_bereich_id, // Include the selected Besch_Bereich ID
+            Besch_Berich_desc: besch_bereich_description, // Include the selected Besch_Bereich Desc
             AccountID: accountID // Include the selected Account ID based on value condition
         };
 		
